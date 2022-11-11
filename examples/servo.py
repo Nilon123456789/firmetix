@@ -21,7 +21,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Attach a pin to a servo and move it about.
@@ -30,8 +30,8 @@ Attach a pin to a servo and move it about.
 # some globals
 SERVO_PIN = 5
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix()
+# Create a Frimetix instance.
+board = firmetix.Frimetix()
 board.set_pin_mode_servo(SERVO_PIN, 100, 3000)
 time.sleep(.2)
 board.servo_write(SERVO_PIN, 90)

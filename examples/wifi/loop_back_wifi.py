@@ -17,11 +17,11 @@
 
 import time
 import sys
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Loopback some data to assure that data can be sent and received between
-the Telemetrix client and arduino-telemetrix server.
+the Frimetix client and arduino-Frimetix server.
 """
 
 
@@ -39,7 +39,7 @@ def loop_back(my_board, loop_back_data):
     This function will request that the supplied characters be
     sent to the board and looped back and printed out to the console.
 
-    :param my_board: a telemetrix instance
+    :param my_board: a Frimetix instance
     :param loop_back_data: A list of characters to have looped back
     """
     try:
@@ -51,7 +51,7 @@ def loop_back(my_board, loop_back_data):
         sys.exit(0)
 
 
-board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+board = firmetix.Frimetix(ip_address='192.168.2.112')
 char_list = ['A', 'B', 'Z']
 try:
     loop_back(board, char_list)

@@ -19,14 +19,14 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor using runSpeedToPosition position
 """
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix()
+# Create a Frimetix instance.
+board = firmetix.Frimetix()
 
 
 def the_callback(data):

@@ -21,7 +21,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Monitor an analog input pin
@@ -59,7 +59,7 @@ def analog_in(my_board, pin):
      analog input. Any changes on this pin will
      be reported through the call back function.
 
-     :param my_board: a telemetrix instance
+     :param my_board: a Frimetix instance
      :param pin: Arduino pin number
      """
 
@@ -80,7 +80,7 @@ def analog_in(my_board, pin):
         sys.exit(0)
 
 
-board = telemetrix.Telemetrix()
+board = firmetix.Frimetix()
 
 try:
     analog_in(board, ANALOG_PIN)

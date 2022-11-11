@@ -17,7 +17,7 @@
 
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 This program continuously monitors an HC-SR04 Ultrasonic Sensor
@@ -48,7 +48,7 @@ def sonar(my_board, trigger_pin, echo_pin, callback):
     Set the pin mode for a sonar device. Results will appear via the
     callback.
 
-    :param my_board: a telemetrix instance
+    :param my_board: a Frimetix instance
     :param trigger_pin: Arduino pin number
     :param echo_pin: Arduino pin number
     :param callback: The callback function
@@ -65,7 +65,7 @@ def sonar(my_board, trigger_pin, echo_pin, callback):
             sys.exit(0)
 
 
-board = telemetrix.Telemetrix()
+board = firmetix.Frimetix()
 try:
     sonar(board, TRIGGER_PIN, ECHO_PIN, the_callback)
     board.shutdown()

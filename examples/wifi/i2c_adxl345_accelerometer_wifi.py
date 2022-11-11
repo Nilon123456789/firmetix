@@ -17,7 +17,7 @@
 
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 This example sets up and control an ADXL345 i2c accelerometer.
@@ -64,7 +64,7 @@ def adxl345(my_board):
             sys.exit(0)
 
 
-board = telemetrix.Telemetrix(ip_address='192.168.2.220')
+board = firmetix.Frimetix(ip_address='192.168.2.220')
 try:
     adxl345(board)
 except KeyboardInterrupt:

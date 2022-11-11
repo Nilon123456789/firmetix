@@ -1,7 +1,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 # set arduino pins acoording to L298N motor driver outputs
 ANALOG_PIN = 3  # enA
@@ -19,8 +19,8 @@ SERVO_PIN = 12
 class wheels():
     def __init__(self):
         # some globals
-        # Create a Telemetrix instance.
-        self.board = telemetrix.Telemetrix()
+        # Create a Frimetix instance.
+        self.board = firmetix.Frimetix()
         # attach servo pin
         self.board.set_pin_mode_servo(SERVO_PIN, 900, 2000)
         # set speed of DC motors

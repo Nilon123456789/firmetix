@@ -35,10 +35,10 @@ the callback functions.
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
-# Instantiate the TelemetrixRpiPico class accepting all default parameters.
-board = telemetrix.Telemetrix(ip_address='192.168.2.220')
+# Instantiate the Frimetix class accepting all default parameters.
+board = firmetix.Frimetix(ip_address='192.168.2.220')
 
 
 # Convenience values for the pins.

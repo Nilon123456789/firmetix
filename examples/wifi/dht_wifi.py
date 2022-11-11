@@ -17,7 +17,7 @@
 
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 This program monitors a DHT 22 sensor. 
@@ -66,7 +66,7 @@ def dht(my_board):
         Set the pin mode for a DHT 22 device. Results will appear via the
         callback.
 
-        :param my_board: a telemetrix instance
+        :param my_board: a Frimetix instance
 
         """
 
@@ -82,7 +82,7 @@ def dht(my_board):
             sys.exit(0)
 
 
-board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+board = firmetix.Frimetix(ip_address='192.168.2.112')
 try:
     dht(board)
     board.shutdown()

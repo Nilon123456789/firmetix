@@ -7,20 +7,20 @@ with open('README.md') as f:
 
 
 setup(
-    name='telemetrix',
-    packages=['telemetrix'],
+    name='firmetix',
+    packages=['firmetix'],
     install_requires=['pyserial'],
 
-    version='1.10',
+    version='1.00',
     description="Remotely Control And Monitor Arduino-Core devices",
     long_description=long_description,
     long_description_content_type='text/markdown',
 
-    author='Alan Yorinks',
-    author_email='MisterYsLab@gmail.com',
-    url='https://github.com/MrYsLab/telemetrix',
-    download_url='https://github.com/MrYsLab/telemetrix',
-    keywords=['telemetrix', 'Arduino', 'Protocol', 'Python'],
+    author='Alan Yorinks and Nils Lahaye',
+    author_email='nils.lahaye@icloud.com',
+    url='https://github.com/Nilon123456789/firmetix',
+    download_url='https://github.com/Nilon123456789/firmetix',
+    keywords=['firmetix', 'Arduino', 'Protocol', 'Python'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Other Environment',

@@ -18,7 +18,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 This program monitors two DHT22 and two DHT11 sensors.
@@ -72,7 +72,7 @@ def dht(my_board, pin, callback, dht_type):
         Set the pin mode for a DHT 22 device. Results will appear via the
         callback.
 
-        :param my_board: an telemetrix instance
+        :param my_board: an Frimetix instance
         :param pin: Arduino pin number
         :param callback: The callback function
         :param dht_type: 22 or 11
@@ -82,7 +82,7 @@ def dht(my_board, pin, callback, dht_type):
     my_board.set_pin_mode_dht(pin, callback, dht_type)
 
 
-board = telemetrix.Telemetrix()
+board = firmetix.Frimetix()
 try:
     dht(board, 8, the_callback, 11)
     dht(board, 9, the_callback, 22)

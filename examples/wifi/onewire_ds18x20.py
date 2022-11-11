@@ -23,7 +23,7 @@ DS18B20 or DS1822 temperature sensor.
 import serial
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 
 # noinspection PyArgumentList
@@ -58,7 +58,7 @@ class OneWireTemp:
 
         # instantiate the library
         try:
-            self.board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+            self.board = firmetix.Frimetix(ip_address='192.168.2.112')
         except (KeyboardInterrupt, serial.serialutil.SerialException):
             print('User abort')
             sys.exit(0)

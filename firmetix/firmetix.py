@@ -1,5 +1,5 @@
 """
- Copyright (c) 2021 Alan Yorinks All rights reserved.
+ Copyright (c) 2022 Nils Lahaye All rights reserved.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -28,13 +28,13 @@ from serial.serialutil import SerialException
 from serial.tools import list_ports
 
 # noinspection PyUnresolvedReferences
-from telemetrix.private_constants import PrivateConstants
+from firmetix.private_constants import PrivateConstants
 
 
 # noinspection PyPep8,PyMethodMayBeStatic,GrazieInspection,PyBroadException,PyCallingNonCallable
-class Telemetrix(threading.Thread):
+class Frimetix(threading.Thread):
     """
-    This class exposes and implements the telemetrix API.
+    This class exposes and implements the frimetix API.
     It uses threading to accommodate concurrency.
     It includes the public API methods as well as
     a set of private methods.
@@ -264,8 +264,8 @@ class Telemetrix(threading.Thread):
         self.the_reporter_thread.start()
         self.the_data_receive_thread.start()
 
-        print(f"Telemetrix:  Version {PrivateConstants.TELEMETRIX_VERSION}\n\n"
-              f"Copyright (c) 2021 Alan Yorinks All Rights Reserved.\n")
+        print(f"Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
+              f"Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n")
 
         # using the serial link
         if not self.ip_address:
@@ -306,18 +306,18 @@ class Telemetrix(threading.Thread):
         print(f'Waiting for Arduino to reset')
         print(f'Reset Complete')
 
-        # get telemetrix firmware version and print it
-        print('\nRetrieving Telemetrix4Arduino firmware ID...')
+        # get frimetix firmware version and print it
+        print('\nRetrieving Frimetix4Arduino firmware ID...')
         self._get_firmware_version()
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f'Telemetrix4Arduino firmware version')
+            raise RuntimeError(f'Frimetix4Arduino firmware version')
 
         else:
             if self.firmware_version[0] < 5:
                 raise RuntimeError('Please upgrade the server firmware to version 5.0.0 or greater')
-            print(f'Telemetrix4Arduino firmware version: {self.firmware_version[0]}.'
+            print(f'FrimetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._send_command(command)
@@ -337,7 +337,7 @@ class Telemetrix(threading.Thread):
         containing a sketch that has a matching arduino_instance_id as
         specified in the input parameters of this class.
 
-        This is used explicitly with the Telemetrix4Arduino sketch.
+        This is used explicitly with the Frimetix4Arduino sketch.
         """
 
         # a list of serial ports to be checked
@@ -408,17 +408,17 @@ class Telemetrix(threading.Thread):
                 raise RuntimeError(f'Incorrect Arduino ID: {self.reported_arduino_id}')
             print('Valid Arduino ID Found.')
             # get arduino firmware version and print it
-            print('\nRetrieving Telemetrix4Arduino firmware ID...')
+            print('\nRetrieving Frimetix4Arduino firmware ID...')
             self._get_firmware_version()
 
             if not self.firmware_version:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f'Telemetrix4Arduino Sketch Firmware Version Not Found')
+                    f'Frimetix4Arduino Sketch Firmware Version Not Found')
 
             else:
-                print(f'Telemetrix4Arduino firmware version: {self.firmware_version[0]}.'
+                print(f'Frimetix4Arduino firmware version: {self.firmware_version[0]}.'
                       f'{self.firmware_version[1]}')
         except KeyboardInterrupt:
             if self.shutdown_on_exception:
@@ -507,7 +507,7 @@ class Telemetrix(threading.Thread):
 
     def _get_arduino_id(self):
         """
-        Retrieve arduino-telemetrix arduino id
+        Retrieve arduino-frimetix arduino id
 
         """
         command = [PrivateConstants.ARE_U_THERE]
@@ -518,7 +518,7 @@ class Telemetrix(threading.Thread):
     def _get_firmware_version(self):
         """
         This method retrieves the
-        arduino-telemetrix firmware version
+        arduino-frimetix firmware version
 
         """
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
@@ -1052,6 +1052,43 @@ class Telemetrix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError(f'The Stepper feature is disabled in the server.')
+    
+    def set_pin_mode_tone(self, pin_number):
+        """
+
+        :param pin_number:
+        """
+        self.set_pin_mode_digital_output(pin_number)
+    
+    def tone(self, pin_number, frequency, duration=0):
+        """
+
+        :param pin_number:
+        :param frequency:
+        :param duration: (0 = play tone continuously)
+        """
+
+        freq_msb = frequency >> 8
+        freq_lsb = frequency & 0xff
+
+
+        dur_msb = 0
+        dur_lsb = 0
+        
+        if (duration > 0):
+            dur_msb = duration >> 8
+            dur_lsb = duration & 0xff
+
+        command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
+        self._send_command(command)
+    
+    def no_tone(self, pin_number):
+        """
+
+        :param pin_number:
+        """
+        command = [PrivateConstants.NO_TONE, pin_number]
+        self._send_command(command)
 
     def servo_write(self, pin_number, angle):
         """
@@ -2175,7 +2212,7 @@ class Telemetrix(threading.Thread):
 
     def _firmware_message(self, data):
         """
-        Telemetrix4Arduino firmware version message
+        Frimetix4Arduino firmware version message
 
         :param data: data[0] = major number, data[1] = minor number.
 

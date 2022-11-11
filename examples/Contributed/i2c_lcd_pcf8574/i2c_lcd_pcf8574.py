@@ -1,6 +1,6 @@
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 This file contains a library to control an i2c LCD. 

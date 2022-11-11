@@ -18,7 +18,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor to a relative position.
@@ -105,8 +105,8 @@ def step_relative(the_board):
     sys.exit(0)
 
 
-# instantiate telemetrix
-board = telemetrix.Telemetrix()
+# instantiate Frimetix
+board = firmetix.Frimetix()
 
 
 try:

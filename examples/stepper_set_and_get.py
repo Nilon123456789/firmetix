@@ -20,11 +20,11 @@
 This file verifies the set and get methods for the stepper API.
 """
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix()
+# Create a Frimetix instance.
+board = firmetix.Frimetix()
 
 
 def current_position_callback(data):

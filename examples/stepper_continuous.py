@@ -21,14 +21,14 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor continuously without acceleration
 """
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix()
+# Create a Frimetix instance.
+board = firmetix.Frimetix()
 
 
 # for continuous motion, the callback is not used, but provided to meet the

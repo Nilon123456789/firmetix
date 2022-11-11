@@ -2,7 +2,7 @@
 
 import sys
 import time
-from telemetrix import telemetrix
+from firmetix import firmetix
 from i2c_lcd_pcf8574 import LcdI2c
 
 
@@ -40,7 +40,7 @@ def pcf8574(my_board):
     time.sleep(0.5)
 
 
-board = telemetrix.Telemetrix()
+board = firmetix.Frimetix()
 try:
     pcf8574(board)
 except KeyboardInterrupt:

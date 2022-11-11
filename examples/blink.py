@@ -21,7 +21,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Setup a pin for digital output 
@@ -31,8 +31,8 @@ and toggle the pin 5 times.
 # some globals
 DIGITAL_PIN = 6  # the board LED
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix()
+# Create a Frimetix instance.
+board = firmetix.Frimetix()
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_digital_output(DIGITAL_PIN)

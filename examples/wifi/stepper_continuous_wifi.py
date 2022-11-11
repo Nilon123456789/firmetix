@@ -21,14 +21,14 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor continuously without acceleration
 """
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+# Create a Frimetix instance.
+board = firmetix.Frimetix(ip_address='192.168.2.112')
 # create an accelstepper instance for a TB6600 motor driver
 motor = board.set_pin_mode_stepper(interface=1, pin1=5, pin2=4)
 # if you are using a 28BYJ-48 Stepper Motor with ULN2003

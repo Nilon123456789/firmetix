@@ -19,7 +19,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Setup a pin for output and fade its intensity
@@ -29,8 +29,8 @@ Setup a pin for output and fade its intensity
 # make sure to select a PWM pin
 DIGITAL_PIN = 5
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+# Create a Frimetix instance.
+board = firmetix.Frimetix(ip_address='192.168.2.112')
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_analog_output(DIGITAL_PIN)

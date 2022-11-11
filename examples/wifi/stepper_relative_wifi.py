@@ -19,14 +19,14 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor to a relative position.
 """
 
-# Create a Telemetrix instance.
-board = telemetrix.Telemetrix(ip_address='192.168.2.112')
+# Create a Frimetix instance.
+board = firmetix.Frimetix(ip_address='192.168.2.112')
 time.sleep(.2)
 
 

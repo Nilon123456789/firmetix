@@ -18,7 +18,7 @@
 import sys
 import time
 
-from telemetrix import telemetrix
+from firmetix import firmetix
 
 """
 Run a motor to an absolute position. Server will send a callback notification 
@@ -121,8 +121,8 @@ def step_absolute(the_board):
     sys.exit(0)
 
 
-# instantiate telemetrix
-board = telemetrix.Telemetrix()
+# instantiate Frimetix
+board = firmetix.Frimetix()
 try:
     # start the main function
     step_absolute(board)
