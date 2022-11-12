@@ -1,6 +1,6 @@
 # The Firmetrix Project
 
-Firmetrix is a fork of the [Telemetrix](https://github.com\MrYsLab\telemetrix) project with the added suport for the tone function
+Firmetrix is a fork of the [Telemetrix](https://github.com/MrYsLab/telemetrix) project with the added suport for the tone function
 
 Here is a feature comparison between Firmetix, StandardFirmata and Telemetrix:
 
@@ -28,7 +28,7 @@ Here is a feature comparison between Firmetix, StandardFirmata and Telemetrix:
 
 
 The project consists of a 
-[Python client API](https://htmlpreview.github.io/?https://github.com/Nilon123456789/firmetix/blob/master/html/firmetix/index.html)
+[Python client API](https://htmlpreview.github.io/?https://github.com/Nilon123456789/firmetix/blob/master/docs/firmetix/index.html)
 used to create a Python 
 client 
 application and C++ servers that communicate with the Python client over a serial or WiFi link. 
@@ -38,7 +38,7 @@ This repository is the Python 3 client API.
 The server for Arduino serial linked devices is called
 [Firmetix4Arduino](https://github.com/Nilon123456789/Firmetix4Arduino).
 
-A [User's Guide](https://mryslab.github.io/telemetrix/) explaining installation and use is available online.
+A [User's Guide](https://nilon123456789.github.io/firmetix/) explaining installation and use is available online.
 
 
 
