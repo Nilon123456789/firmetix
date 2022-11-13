@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script>
+    <title>Firmetix</title>
+</head>
+<body>
+    <!--Navigation bar-->
+    <div id="nav-placeholder" style="position: sticky; top: 0; z-index: 1;"> </div>
+    <script> $(function(){ $("#nav-placeholder").load("nav.html");}); </script>
+    
+    <h1>Firmetix</h1>
+    <p class="description">
+        Firmetix is an interface layer to program an arduino with python
+    </p>
+    <div class="summary">
+        <p> Firmetix is a project based on Telemetrix made by Alan Yorinks with the goal of combining the features of Telemetrix and Pymata4 to have the all in one python controled arduino. The project consite of a python library that is communicating with a c++ script that's on the arduino</p>
+        <zero-md src="README.md" style="text-align: center">
+            <template>
+                
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sindresorhus/github-markdown-css@4/github-markdown.min.css">
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/PrismJS/prism@1/themes/prism.min.css">
+                <style>
+                    .markdown-body table {
+                        margin-left: auto;
+                        margin-right: auto;
+                        width: fit-content;
+                    }
+                </style>
+              </template>
+        </zero-md>
+    </div>
+<!--Footer-->
+<div id="footer-placeholder"> </div>
+<script> $(function(){ $("#footer-placeholder").load("footer.html");}); </script>
+</body>
+</html>

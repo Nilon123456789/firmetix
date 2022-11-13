@@ -1,0 +1,44 @@
+.header {
+    position: sticky; 
+    top: 0;
+}
+
+nav .nav-items {
+    background: #333;
+    flex-direction: row;
+    justify-content: flex-end;
+    display: flex;
+    box-sizing: border-box;
+    height: 50px;
+    width: 100%;
+}
+nav .nav-a {
+    color: #fff;
+    display: inline-block;
+    font-size: 20px;
+    padding: 10px 20px;
+    text-decoration: none;
+}
+nav .nav-p {
+    color: #fff;
+    font-size: 20px;
+    padding: 10px 20px;
+    margin: 0;
+    text-decoration: none;
+    flex: auto;
+    text-align: left;
+}
+nav .nav-icon {
+    padding-top: 10px;
+    padding-bottom: 0px;
+    padding: 10px 20px;
+}
+
+nav a:hover {
+    background: #555;
+}
+
+nav .github {
+    background: #333;
+    height: 25px;
+}
