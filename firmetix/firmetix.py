@@ -1,5 +1,5 @@
 """
- Copyright (c) 2022 Nils Lahaye All rights reserved.
+ Copyright (c) 2022 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -1055,6 +1055,7 @@ class Frimetix(threading.Thread):
     
     def set_pin_mode_tone(self, pin_number):
         """
+        Same as set_pin_mode_digital_output
 
         :param pin_number:
         """
@@ -1062,10 +1063,11 @@ class Frimetix(threading.Thread):
     
     def tone(self, pin_number, frequency, duration=0):
         """
+        Play a tone of a given frequency for a given duration.
 
         :param pin_number:
         :param frequency:
-        :param duration: (0 = play tone continuously)
+        :param duration: in millisecond (0 = play tone continuously)
         """
 
         freq_msb = frequency >> 8
@@ -1084,6 +1086,7 @@ class Frimetix(threading.Thread):
     
     def no_tone(self, pin_number):
         """
+        Stop playing the tone.
 
         :param pin_number:
         """

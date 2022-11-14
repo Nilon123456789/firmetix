@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>telemetrix.telemetrix API documentation</title>
-<meta name="description" content="Copyright (c) 2021 Alan Yorinks All rights reserved â€¦" />
+<title>firmetix.firmetix API documentation</title>
+<meta name="description" content="Copyright (c) 2022 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,10 +19,10 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>telemetrix.telemetrix</code></h1>
+<h1 class="title">Module <code>firmetix.firmetix</code></h1>
 </header>
 <section id="section-intro">
-<p>Copyright (c) 2021 Alan Yorinks All rights reserved.</p>
+<p>Copyright (c) 2022 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks</p>
 <p>This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3 as published by the Free Software Foundation; either
@@ -42,7 +42,7 @@ USA</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">&#34;&#34;&#34;
- Copyright (c) 2021 Alan Yorinks All rights reserved.
+ Copyright (c) 2022 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -71,13 +71,13 @@ from serial.serialutil import SerialException
 from serial.tools import list_ports
 
 # noinspection PyUnresolvedReferences
-from telemetrix.private_constants import PrivateConstants
+from firmetix.private_constants import PrivateConstants
 
 
 # noinspection PyPep8,PyMethodMayBeStatic,GrazieInspection,PyBroadException,PyCallingNonCallable
-class Telemetrix(threading.Thread):
+class Frimetix(threading.Thread):
     &#34;&#34;&#34;
-    This class exposes and implements the telemetrix API.
+    This class exposes and implements the frimetix API.
     It uses threading to accommodate concurrency.
     It includes the public API methods as well as
     a set of private methods.
@@ -307,8 +307,8 @@ class Telemetrix(threading.Thread):
         self.the_reporter_thread.start()
         self.the_data_receive_thread.start()
 
-        print(f&#34;Telemetrix:  Version {PrivateConstants.TELEMETRIX_VERSION}\n\n&#34;
-              f&#34;Copyright (c) 2021 Alan Yorinks All Rights Reserved.\n&#34;)
+        print(f&#34;Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n&#34;
+              f&#34;Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n&#34;)
 
         # using the serial link
         if not self.ip_address:
@@ -349,18 +349,18 @@ class Telemetrix(threading.Thread):
         print(f&#39;Waiting for Arduino to reset&#39;)
         print(f&#39;Reset Complete&#39;)
 
-        # get telemetrix firmware version and print it
-        print(&#39;\nRetrieving Telemetrix4Arduino firmware ID...&#39;)
+        # get frimetix firmware version and print it
+        print(&#39;\nRetrieving Frimetix4Arduino firmware ID...&#39;)
         self._get_firmware_version()
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f&#39;Telemetrix4Arduino firmware version&#39;)
+            raise RuntimeError(f&#39;Frimetix4Arduino firmware version&#39;)
 
         else:
             if self.firmware_version[0] &lt; 5:
                 raise RuntimeError(&#39;Please upgrade the server firmware to version 5.0.0 or greater&#39;)
-            print(f&#39;Telemetrix4Arduino firmware version: {self.firmware_version[0]}.&#39;
+            print(f&#39;FrimetixArduino firmware version: {self.firmware_version[0]}.&#39;
                   f&#39;{self.firmware_version[1]}.{self.firmware_version[2]}&#39;)
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._send_command(command)
@@ -380,7 +380,7 @@ class Telemetrix(threading.Thread):
         containing a sketch that has a matching arduino_instance_id as
         specified in the input parameters of this class.
 
-        This is used explicitly with the Telemetrix4Arduino sketch.
+        This is used explicitly with the Frimetix4Arduino sketch.
         &#34;&#34;&#34;
 
         # a list of serial ports to be checked
@@ -451,17 +451,17 @@ class Telemetrix(threading.Thread):
                 raise RuntimeError(f&#39;Incorrect Arduino ID: {self.reported_arduino_id}&#39;)
             print(&#39;Valid Arduino ID Found.&#39;)
             # get arduino firmware version and print it
-            print(&#39;\nRetrieving Telemetrix4Arduino firmware ID...&#39;)
+            print(&#39;\nRetrieving Frimetix4Arduino firmware ID...&#39;)
             self._get_firmware_version()
 
             if not self.firmware_version:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f&#39;Telemetrix4Arduino Sketch Firmware Version Not Found&#39;)
+                    f&#39;Frimetix4Arduino Sketch Firmware Version Not Found&#39;)
 
             else:
-                print(f&#39;Telemetrix4Arduino firmware version: {self.firmware_version[0]}.&#39;
+                print(f&#39;Frimetix4Arduino firmware version: {self.firmware_version[0]}.&#39;
                       f&#39;{self.firmware_version[1]}&#39;)
         except KeyboardInterrupt:
             if self.shutdown_on_exception:
@@ -550,7 +550,7 @@ class Telemetrix(threading.Thread):
 
     def _get_arduino_id(self):
         &#34;&#34;&#34;
-        Retrieve arduino-telemetrix arduino id
+        Retrieve arduino-frimetix arduino id
 
         &#34;&#34;&#34;
         command = [PrivateConstants.ARE_U_THERE]
@@ -561,7 +561,7 @@ class Telemetrix(threading.Thread):
     def _get_firmware_version(self):
         &#34;&#34;&#34;
         This method retrieves the
-        arduino-telemetrix firmware version
+        arduino-frimetix firmware version
 
         &#34;&#34;&#34;
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
@@ -1095,6 +1095,46 @@ class Telemetrix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError(f&#39;The Stepper feature is disabled in the server.&#39;)
+    
+    def set_pin_mode_tone(self, pin_number):
+        &#34;&#34;&#34;
+        Same as set_pin_mode_digital_output
+
+        :param pin_number:
+        &#34;&#34;&#34;
+        self.set_pin_mode_digital_output(pin_number)
+    
+    def tone(self, pin_number, frequency, duration=0):
+        &#34;&#34;&#34;
+        Play a tone of a given frequency for a given duration.
+
+        :param pin_number:
+        :param frequency:
+        :param duration: in millisecond (0 = play tone continuously)
+        &#34;&#34;&#34;
+
+        freq_msb = frequency &gt;&gt; 8
+        freq_lsb = frequency &amp; 0xff
+
+
+        dur_msb = 0
+        dur_lsb = 0
+        
+        if (duration &gt; 0):
+            dur_msb = duration &gt;&gt; 8
+            dur_lsb = duration &amp; 0xff
+
+        command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
+        self._send_command(command)
+    
+    def no_tone(self, pin_number):
+        &#34;&#34;&#34;
+        Stop playing the tone.
+
+        :param pin_number:
+        &#34;&#34;&#34;
+        command = [PrivateConstants.NO_TONE, pin_number]
+        self._send_command(command)
 
     def servo_write(self, pin_number, angle):
         &#34;&#34;&#34;
@@ -2218,7 +2258,7 @@ class Telemetrix(threading.Thread):
 
     def _firmware_message(self, data):
         &#34;&#34;&#34;
-        Telemetrix4Arduino firmware version message
+        Frimetix4Arduino firmware version message
 
         :param data: data[0] = major number, data[1] = minor number.
 
@@ -2589,12 +2629,12 @@ class Telemetrix(threading.Thread):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="telemetrix.telemetrix.Telemetrix"><code class="flex name class">
-<span>class <span class="ident">Telemetrix</span></span>
+<dt id="firmetix.firmetix.Frimetix"><code class="flex name class">
+<span>class <span class="ident">Frimetix</span></span>
 <span>(</span><span>com_port=None, arduino_instance_id=1, arduino_wait=4, sleep_tune=1e-06, shutdown_on_exception=True, ip_address=None, ip_port=31335)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>This class exposes and implements the telemetrix API.
+<div class="desc"><p>This class exposes and implements the frimetix API.
 It uses threading to accommodate concurrency.
 It includes the public API methods as well as
 a set of private methods.</p>
@@ -2615,9 +2655,9 @@ receiving a KeyboardInterrupt exception</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class Telemetrix(threading.Thread):
+<pre><code class="python">class Frimetix(threading.Thread):
     &#34;&#34;&#34;
-    This class exposes and implements the telemetrix API.
+    This class exposes and implements the frimetix API.
     It uses threading to accommodate concurrency.
     It includes the public API methods as well as
     a set of private methods.
@@ -2847,8 +2887,8 @@ receiving a KeyboardInterrupt exception</p>
         self.the_reporter_thread.start()
         self.the_data_receive_thread.start()
 
-        print(f&#34;Telemetrix:  Version {PrivateConstants.TELEMETRIX_VERSION}\n\n&#34;
-              f&#34;Copyright (c) 2021 Alan Yorinks All Rights Reserved.\n&#34;)
+        print(f&#34;Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n&#34;
+              f&#34;Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n&#34;)
 
         # using the serial link
         if not self.ip_address:
@@ -2889,18 +2929,18 @@ receiving a KeyboardInterrupt exception</p>
         print(f&#39;Waiting for Arduino to reset&#39;)
         print(f&#39;Reset Complete&#39;)
 
-        # get telemetrix firmware version and print it
-        print(&#39;\nRetrieving Telemetrix4Arduino firmware ID...&#39;)
+        # get frimetix firmware version and print it
+        print(&#39;\nRetrieving Frimetix4Arduino firmware ID...&#39;)
         self._get_firmware_version()
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f&#39;Telemetrix4Arduino firmware version&#39;)
+            raise RuntimeError(f&#39;Frimetix4Arduino firmware version&#39;)
 
         else:
             if self.firmware_version[0] &lt; 5:
                 raise RuntimeError(&#39;Please upgrade the server firmware to version 5.0.0 or greater&#39;)
-            print(f&#39;Telemetrix4Arduino firmware version: {self.firmware_version[0]}.&#39;
+            print(f&#39;FrimetixArduino firmware version: {self.firmware_version[0]}.&#39;
                   f&#39;{self.firmware_version[1]}.{self.firmware_version[2]}&#39;)
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._send_command(command)
@@ -2920,7 +2960,7 @@ receiving a KeyboardInterrupt exception</p>
         containing a sketch that has a matching arduino_instance_id as
         specified in the input parameters of this class.
 
-        This is used explicitly with the Telemetrix4Arduino sketch.
+        This is used explicitly with the Frimetix4Arduino sketch.
         &#34;&#34;&#34;
 
         # a list of serial ports to be checked
@@ -2991,17 +3031,17 @@ receiving a KeyboardInterrupt exception</p>
                 raise RuntimeError(f&#39;Incorrect Arduino ID: {self.reported_arduino_id}&#39;)
             print(&#39;Valid Arduino ID Found.&#39;)
             # get arduino firmware version and print it
-            print(&#39;\nRetrieving Telemetrix4Arduino firmware ID...&#39;)
+            print(&#39;\nRetrieving Frimetix4Arduino firmware ID...&#39;)
             self._get_firmware_version()
 
             if not self.firmware_version:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f&#39;Telemetrix4Arduino Sketch Firmware Version Not Found&#39;)
+                    f&#39;Frimetix4Arduino Sketch Firmware Version Not Found&#39;)
 
             else:
-                print(f&#39;Telemetrix4Arduino firmware version: {self.firmware_version[0]}.&#39;
+                print(f&#39;Frimetix4Arduino firmware version: {self.firmware_version[0]}.&#39;
                       f&#39;{self.firmware_version[1]}&#39;)
         except KeyboardInterrupt:
             if self.shutdown_on_exception:
@@ -3090,7 +3130,7 @@ receiving a KeyboardInterrupt exception</p>
 
     def _get_arduino_id(self):
         &#34;&#34;&#34;
-        Retrieve arduino-telemetrix arduino id
+        Retrieve arduino-frimetix arduino id
 
         &#34;&#34;&#34;
         command = [PrivateConstants.ARE_U_THERE]
@@ -3101,7 +3141,7 @@ receiving a KeyboardInterrupt exception</p>
     def _get_firmware_version(self):
         &#34;&#34;&#34;
         This method retrieves the
-        arduino-telemetrix firmware version
+        arduino-frimetix firmware version
 
         &#34;&#34;&#34;
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
@@ -3635,6 +3675,46 @@ receiving a KeyboardInterrupt exception</p>
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError(f&#39;The Stepper feature is disabled in the server.&#39;)
+    
+    def set_pin_mode_tone(self, pin_number):
+        &#34;&#34;&#34;
+        Same as set_pin_mode_digital_output
+
+        :param pin_number:
+        &#34;&#34;&#34;
+        self.set_pin_mode_digital_output(pin_number)
+    
+    def tone(self, pin_number, frequency, duration=0):
+        &#34;&#34;&#34;
+        Play a tone of a given frequency for a given duration.
+
+        :param pin_number:
+        :param frequency:
+        :param duration: in millisecond (0 = play tone continuously)
+        &#34;&#34;&#34;
+
+        freq_msb = frequency &gt;&gt; 8
+        freq_lsb = frequency &amp; 0xff
+
+
+        dur_msb = 0
+        dur_lsb = 0
+        
+        if (duration &gt; 0):
+            dur_msb = duration &gt;&gt; 8
+            dur_lsb = duration &amp; 0xff
+
+        command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
+        self._send_command(command)
+    
+    def no_tone(self, pin_number):
+        &#34;&#34;&#34;
+        Stop playing the tone.
+
+        :param pin_number:
+        &#34;&#34;&#34;
+        command = [PrivateConstants.NO_TONE, pin_number]
+        self._send_command(command)
 
     def servo_write(self, pin_number, angle):
         &#34;&#34;&#34;
@@ -4758,7 +4838,7 @@ receiving a KeyboardInterrupt exception</p>
 
     def _firmware_message(self, data):
         &#34;&#34;&#34;
-        Telemetrix4Arduino firmware version message
+        Frimetix4Arduino firmware version message
 
         :param data: data[0] = major number, data[1] = minor number.
 
@@ -5125,7 +5205,7 @@ receiving a KeyboardInterrupt exception</p>
 </ul>
 <h3>Methods</h3>
 <dl>
-<dt id="telemetrix.telemetrix.Telemetrix.analog_write"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.analog_write"><code class="name flex">
 <span>def <span class="ident">analog_write</span></span>(<span>self, pin, value)</span>
 </code></dt>
 <dd>
@@ -5151,7 +5231,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.digital_write"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.digital_write"><code class="name flex">
 <span>def <span class="ident">digital_write</span></span>(<span>self, pin, value)</span>
 </code></dt>
 <dd>
@@ -5176,7 +5256,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.disable_all_reporting"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.disable_all_reporting"><code class="name flex">
 <span>def <span class="ident">disable_all_reporting</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -5194,7 +5274,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.disable_analog_reporting"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.disable_analog_reporting"><code class="name flex">
 <span>def <span class="ident">disable_analog_reporting</span></span>(<span>self, pin)</span>
 </code></dt>
 <dd>
@@ -5216,7 +5296,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.disable_digital_reporting"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.disable_digital_reporting"><code class="name flex">
 <span>def <span class="ident">disable_digital_reporting</span></span>(<span>self, pin)</span>
 </code></dt>
 <dd>
@@ -5238,7 +5318,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.enable_analog_reporting"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.enable_analog_reporting"><code class="name flex">
 <span>def <span class="ident">enable_analog_reporting</span></span>(<span>self, pin)</span>
 </code></dt>
 <dd>
@@ -5261,7 +5341,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.enable_digital_reporting"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.enable_digital_reporting"><code class="name flex">
 <span>def <span class="ident">enable_digital_reporting</span></span>(<span>self, pin)</span>
 </code></dt>
 <dd>
@@ -5283,7 +5363,7 @@ receiving a KeyboardInterrupt exception</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.i2c_read"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.i2c_read"><code class="name flex">
 <span>def <span class="ident">i2c_read</span></span>(<span>self, address, register, number_of_bytes, callback=None, i2c_port=0, write_register=True)</span>
 </code></dt>
 <dd>
@@ -5343,7 +5423,7 @@ data bytes, time-stamp]</p></div>
                            write_register=write_register)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.i2c_read_restart_transmission"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.i2c_read_restart_transmission"><code class="name flex">
 <span>def <span class="ident">i2c_read_restart_transmission</span></span>(<span>self, address, register, number_of_bytes, callback=None, i2c_port=0, write_register=True)</span>
 </code></dt>
 <dd>
@@ -5408,7 +5488,7 @@ data bytes, time-stamp]</p></div>
                            write_register=write_register)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.i2c_write"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.i2c_write"><code class="name flex">
 <span>def <span class="ident">i2c_write</span></span>(<span>self, address, args, i2c_port=0)</span>
 </code></dt>
 <dd>
@@ -5455,7 +5535,7 @@ passed in as a list</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.loop_back"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.loop_back"><code class="name flex">
 <span>def <span class="ident">loop_back</span></span>(<span>self, start_character, callback=None)</span>
 </code></dt>
 <dd>
@@ -5484,7 +5564,27 @@ an integer.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_crc8"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.no_tone"><code class="name flex">
+<span>def <span class="ident">no_tone</span></span>(<span>self, pin_number)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Stop playing the tone.</p>
+<p>:param pin_number:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def no_tone(self, pin_number):
+    &#34;&#34;&#34;
+    Stop playing the tone.
+
+    :param pin_number:
+    &#34;&#34;&#34;
+    command = [PrivateConstants.NO_TONE, pin_number]
+    self._send_command(command)</code></pre>
+</details>
+</dd>
+<dt id="firmetix.firmetix.Frimetix.onewire_crc8"><code class="name flex">
 <span>def <span class="ident">onewire_crc8</span></span>(<span>self, address_list, callback=None)</span>
 </code></dt>
 <dd>
@@ -5540,7 +5640,7 @@ function to report a onewire device address</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_read"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_read"><code class="name flex">
 <span>def <span class="ident">onewire_read</span></span>(<span>self, callback=None)</span>
 </code></dt>
 <dd>
@@ -5583,7 +5683,7 @@ result of read command</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_reset"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_reset"><code class="name flex">
 <span>def <span class="ident">onewire_reset</span></span>(<span>self, callback=None)</span>
 </code></dt>
 <dd>
@@ -5622,7 +5722,7 @@ timestamp]</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_reset_search"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_reset_search"><code class="name flex">
 <span>def <span class="ident">onewire_reset_search</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -5646,7 +5746,7 @@ timestamp]</p></div>
         self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_search"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_search"><code class="name flex">
 <span>def <span class="ident">onewire_search</span></span>(<span>self, callback=None)</span>
 </code></dt>
 <dd>
@@ -5693,7 +5793,7 @@ function to report a onewire device address</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_select"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_select"><code class="name flex">
 <span>def <span class="ident">onewire_select</span></span>(<span>self, device_address)</span>
 </code></dt>
 <dd>
@@ -5730,7 +5830,7 @@ function to report a onewire device address</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_skip"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_skip"><code class="name flex">
 <span>def <span class="ident">onewire_skip</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -5756,7 +5856,7 @@ immediately access your device.</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.onewire_write"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.onewire_write"><code class="name flex">
 <span>def <span class="ident">onewire_write</span></span>(<span>self, data, power=0)</span>
 </code></dt>
 <dd>
@@ -5795,7 +5895,7 @@ another read or write.</p>
         raise RuntimeError(&#39;onewire_write: Data must be no larger than 255&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.servo_detach"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.servo_detach"><code class="name flex">
 <span>def <span class="ident">servo_detach</span></span>(<span>self, pin_number)</span>
 </code></dt>
 <dd>
@@ -5816,7 +5916,7 @@ another read or write.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.servo_write"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.servo_write"><code class="name flex">
 <span>def <span class="ident">servo_write</span></span>(<span>self, pin_number, angle)</span>
 </code></dt>
 <dd>
@@ -5841,7 +5941,7 @@ another read or write.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_analog_scan_interval"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_analog_scan_interval"><code class="name flex">
 <span>def <span class="ident">set_analog_scan_interval</span></span>(<span>self, interval)</span>
 </code></dt>
 <dd>
@@ -5867,7 +5967,7 @@ another read or write.</p>
         raise RuntimeError(&#39;Analog interval must be between 0 and 255&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_input"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_analog_input"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_analog_input</span></span>(<span>self, pin_number, differential=0, callback=None)</span>
 </code></dt>
 <dd>
@@ -5906,7 +6006,7 @@ report will be generated</p>
                        callback)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_output"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_analog_output"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_analog_output</span></span>(<span>self, pin_number)</span>
 </code></dt>
 <dd>
@@ -5926,7 +6026,7 @@ report will be generated</p>
     self._set_pin_mode(pin_number, PrivateConstants.AT_OUTPUT)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_dht"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_dht"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_dht</span></span>(<span>self, pin, callback=None, dht_type=22)</span>
 </code></dt>
 <dd>
@@ -5985,7 +6085,7 @@ Time]</p>
         raise RuntimeError(f&#39;The DHT feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_digital_input"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_digital_input</span></span>(<span>self, pin_number, callback=None)</span>
 </code></dt>
 <dd>
@@ -6018,7 +6118,7 @@ Time]</p>
     self._set_pin_mode(pin_number, PrivateConstants.AT_INPUT, callback=callback)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input_pullup"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_digital_input_pullup"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_digital_input_pullup</span></span>(<span>self, pin_number, callback=None)</span>
 </code></dt>
 <dd>
@@ -6051,7 +6151,7 @@ Time]</p>
                        callback=callback)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_output"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_digital_output"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_digital_output</span></span>(<span>self, pin_number)</span>
 </code></dt>
 <dd>
@@ -6071,7 +6171,7 @@ Time]</p>
     self._set_pin_mode(pin_number, PrivateConstants.AT_OUTPUT)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_i2c"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_i2c"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_i2c</span></span>(<span>self, i2c_port=0)</span>
 </code></dt>
 <dd>
@@ -6118,7 +6218,7 @@ API.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_one_wire"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_one_wire"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_one_wire</span></span>(<span>self, pin)</span>
 </code></dt>
 <dd>
@@ -6144,7 +6244,7 @@ API.</p>
         raise RuntimeError(f&#39;The OneWire feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_servo"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_servo"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_servo</span></span>(<span>self, pin_number, min_pulse=544, max_pulse=2400)</span>
 </code></dt>
 <dd>
@@ -6182,7 +6282,7 @@ API.</p>
         raise RuntimeError(f&#39;The SERVO feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_sonar"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_sonar"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_sonar</span></span>(<span>self, trigger_pin, echo_pin, callback=None)</span>
 </code></dt>
 <dd>
@@ -6231,7 +6331,7 @@ API.</p>
         raise RuntimeError(f&#39;The SONAR feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_spi"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_spi"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_spi</span></span>(<span>self, chip_select_list=None)</span>
 </code></dt>
 <dd>
@@ -6288,7 +6388,7 @@ NOTE: You must specify the chips select pins here!</p>
         raise RuntimeError(f&#39;The SPI feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.set_pin_mode_stepper"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_stepper"><code class="name flex">
 <span>def <span class="ident">set_pin_mode_stepper</span></span>(<span>self, interface=1, pin1=2, pin2=3, pin3=4, pin4=5, enable=True)</span>
 </code></dt>
 <dd>
@@ -6395,7 +6495,26 @@ the AccelStepper library for the Arduino.</p>
         raise RuntimeError(f&#39;The Stepper feature is disabled in the server.&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.shutdown"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.set_pin_mode_tone"><code class="name flex">
+<span>def <span class="ident">set_pin_mode_tone</span></span>(<span>self, pin_number)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Same as set_pin_mode_digital_output</p>
+<p>:param pin_number:</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_pin_mode_tone(self, pin_number):
+    &#34;&#34;&#34;
+    Same as set_pin_mode_digital_output
+
+    :param pin_number:
+    &#34;&#34;&#34;
+    self.set_pin_mode_digital_output(pin_number)</code></pre>
+</details>
+</dd>
+<dt id="firmetix.firmetix.Frimetix.shutdown"><code class="name flex">
 <span>def <span class="ident">shutdown</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -6439,7 +6558,7 @@ If any exceptions are thrown, they are ignored.</p></div>
         raise RuntimeError(&#39;Shutdown failed - could not send stop streaming message&#39;)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.spi_cs_control"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.spi_cs_control"><code class="name flex">
 <span>def <span class="ident">spi_cs_control</span></span>(<span>self, chip_select_pin, select)</span>
 </code></dt>
 <dd>
@@ -6470,7 +6589,7 @@ If any exceptions are thrown, they are ignored.</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.spi_read_blocking"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.spi_read_blocking"><code class="name flex">
 <span>def <span class="ident">spi_read_blocking</span></span>(<span>self, register_selection, number_of_bytes_to_read, call_back=None)</span>
 </code></dt>
 <dd>
@@ -6526,7 +6645,7 @@ result of read command</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.spi_set_format"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.spi_set_format"><code class="name flex">
 <span>def <span class="ident">spi_set_format</span></span>(<span>self, clock_divisor, bit_order, data_mode)</span>
 </code></dt>
 <dd>
@@ -6587,7 +6706,7 @@ result of read command</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.spi_write_blocking"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.spi_write_blocking"><code class="name flex">
 <span>def <span class="ident">spi_write_blocking</span></span>(<span>self, bytes_to_write)</span>
 </code></dt>
 <dd>
@@ -6625,7 +6744,7 @@ be in the form of a list.</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_disable_outputs"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_disable_outputs"><code class="name flex">
 <span>def <span class="ident">stepper_disable_outputs</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -6667,7 +6786,7 @@ the pin to disabled.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_enable_outputs"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_enable_outputs"><code class="name flex">
 <span>def <span class="ident">stepper_enable_outputs</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -6699,7 +6818,7 @@ the pin to enabled.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_get_current_position"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_get_current_position"><code class="name flex">
 <span>def <span class="ident">stepper_get_current_position</span></span>(<span>self, motor_id, current_position_callback)</span>
 </code></dt>
 <dd>
@@ -6744,7 +6863,7 @@ the pin to enabled.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_get_distance_to_go"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_get_distance_to_go"><code class="name flex">
 <span>def <span class="ident">stepper_get_distance_to_go</span></span>(<span>self, motor_id, distance_to_go_callback)</span>
 </code></dt>
 <dd>
@@ -6790,7 +6909,7 @@ from the server.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_get_max_speed"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_get_max_speed"><code class="name flex">
 <span>def <span class="ident">stepper_get_max_speed</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -6822,7 +6941,7 @@ that was previously set by stepper_set_max_speed()</p>
     return self.stepper_info_list[motor_id][&#39;max_speed&#39;]</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_get_speed"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_get_speed"><code class="name flex">
 <span>def <span class="ident">stepper_get_speed</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -6854,7 +6973,7 @@ that was previously set by stepper_set_speed();</p>
     return self.stepper_info_list[motor_id][&#39;speed&#39;]</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_get_target_position"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_get_target_position"><code class="name flex">
 <span>def <span class="ident">stepper_get_target_position</span></span>(<span>self, motor_id, target_callback)</span>
 </code></dt>
 <dd>
@@ -6901,7 +7020,7 @@ that was previously set by stepper_set_speed();</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_is_running"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_is_running"><code class="name flex">
 <span>def <span class="ident">stepper_is_running</span></span>(<span>self, motor_id, callback)</span>
 </code></dt>
 <dd>
@@ -6946,7 +7065,7 @@ that was previously set by stepper_set_speed();</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_move"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_move"><code class="name flex">
 <span>def <span class="ident">stepper_move</span></span>(<span>self, motor_id, relative_position)</span>
 </code></dt>
 <dd>
@@ -6989,7 +7108,7 @@ the current position. Maximum value is 32 bits.</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_move_to"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_move_to"><code class="name flex">
 <span>def <span class="ident">stepper_move_to</span></span>(<span>self, motor_id, position)</span>
 </code></dt>
 <dd>
@@ -7042,7 +7161,7 @@ after calling moveTo().</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_run"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_run"><code class="name flex">
 <span>def <span class="ident">stepper_run</span></span>(<span>self, motor_id, completion_callback=None)</span>
 </code></dt>
 <dd>
@@ -7091,7 +7210,7 @@ notification</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_run_speed"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_run_speed"><code class="name flex">
 <span>def <span class="ident">stepper_run_speed</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -7122,7 +7241,7 @@ recent call to stepper_set_max_speed(). The motor will run continuously.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_run_speed_to_position"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_run_speed_to_position"><code class="name flex">
 <span>def <span class="ident">stepper_run_speed_to_position</span></span>(<span>self, motor_id, completion_callback=None)</span>
 </code></dt>
 <dd>
@@ -7173,7 +7292,7 @@ notification</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_3_pins_inverted"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_3_pins_inverted"><code class="name flex">
 <span>def <span class="ident">stepper_set_3_pins_inverted</span></span>(<span>self, motor_id, direction=False, step=False, enable=False)</span>
 </code></dt>
 <dd>
@@ -7210,7 +7329,7 @@ notification</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_4_pins_inverted"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_4_pins_inverted"><code class="name flex">
 <span>def <span class="ident">stepper_set_4_pins_inverted</span></span>(<span>self, motor_id, pin1_invert=False, pin2_invert=False, pin3_invert=False, pin4_invert=False, enable=False)</span>
 </code></dt>
 <dd>
@@ -7253,7 +7372,7 @@ notification</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_acceleration"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_acceleration"><code class="name flex">
 <span>def <span class="ident">stepper_set_acceleration</span></span>(<span>self, motor_id, acceleration)</span>
 </code></dt>
 <dd>
@@ -7302,7 +7421,7 @@ Dont call more often than needed.</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_current_position"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_current_position"><code class="name flex">
 <span>def <span class="ident">stepper_set_current_position</span></span>(<span>self, motor_id, position)</span>
 </code></dt>
 <dd>
@@ -7344,7 +7463,7 @@ positioning move.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_enable_pin"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_enable_pin"><code class="name flex">
 <span>def <span class="ident">stepper_set_enable_pin</span></span>(<span>self, motor_id, pin=255)</span>
 </code></dt>
 <dd>
@@ -7386,7 +7505,7 @@ is called.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_max_speed"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_max_speed"><code class="name flex">
 <span>def <span class="ident">stepper_set_max_speed</span></span>(<span>self, motor_id, max_speed)</span>
 </code></dt>
 <dd>
@@ -7437,7 +7556,7 @@ result in non-linear accelerations and decelerations.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_min_pulse_width"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_min_pulse_width"><code class="name flex">
 <span>def <span class="ident">stepper_set_min_pulse_width</span></span>(<span>self, motor_id, minimum_width)</span>
 </code></dt>
 <dd>
@@ -7481,7 +7600,7 @@ result in non-linear accelerations and decelerations.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_set_speed"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_set_speed"><code class="name flex">
 <span>def <span class="ident">stepper_set_speed</span></span>(<span>self, motor_id, speed)</span>
 </code></dt>
 <dd>
@@ -7532,7 +7651,7 @@ stepper_set_max_speed().</p></div>
     self._send_command(command)</code></pre>
 </details>
 </dd>
-<dt id="telemetrix.telemetrix.Telemetrix.stepper_stop"><code class="name flex">
+<dt id="firmetix.firmetix.Frimetix.stepper_stop"><code class="name flex">
 <span>def <span class="ident">stepper_stop</span></span>(<span>self, motor_id)</span>
 </code></dt>
 <dd>
@@ -7562,6 +7681,42 @@ acceleration parameters.</p>
     self._send_command(command)</code></pre>
 </details>
 </dd>
+<dt id="firmetix.firmetix.Frimetix.tone"><code class="name flex">
+<span>def <span class="ident">tone</span></span>(<span>self, pin_number, frequency, duration=0)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Play a tone of a given frequency for a given duration.</p>
+<p>:param pin_number:
+:param frequency:
+:param duration: in millisecond (0 = play tone continuously)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def tone(self, pin_number, frequency, duration=0):
+    &#34;&#34;&#34;
+    Play a tone of a given frequency for a given duration.
+
+    :param pin_number:
+    :param frequency:
+    :param duration: in millisecond (0 = play tone continuously)
+    &#34;&#34;&#34;
+
+    freq_msb = frequency &gt;&gt; 8
+    freq_lsb = frequency &amp; 0xff
+
+
+    dur_msb = 0
+    dur_lsb = 0
+    
+    if (duration &gt; 0):
+        dur_msb = duration &gt;&gt; 8
+        dur_lsb = duration &amp; 0xff
+
+    command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
+    self._send_command(command)</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -7573,77 +7728,75 @@ acceleration parameters.</p>
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3>Super-module</h3>
-<ul>
-<li><code><a title="telemetrix" href="index.html">telemetrix</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="telemetrix.telemetrix.Telemetrix" href="#telemetrix.telemetrix.Telemetrix">Telemetrix</a></code></h4>
+<h4><code><a title="firmetix.firmetix.Frimetix" href="#firmetix.firmetix.Frimetix">Frimetix</a></code></h4>
 <ul class="">
-<li><code><a title="telemetrix.telemetrix.Telemetrix.analog_write" href="#telemetrix.telemetrix.Telemetrix.analog_write">analog_write</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.digital_write" href="#telemetrix.telemetrix.Telemetrix.digital_write">digital_write</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.disable_all_reporting" href="#telemetrix.telemetrix.Telemetrix.disable_all_reporting">disable_all_reporting</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.disable_analog_reporting" href="#telemetrix.telemetrix.Telemetrix.disable_analog_reporting">disable_analog_reporting</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.disable_digital_reporting" href="#telemetrix.telemetrix.Telemetrix.disable_digital_reporting">disable_digital_reporting</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.enable_analog_reporting" href="#telemetrix.telemetrix.Telemetrix.enable_analog_reporting">enable_analog_reporting</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.enable_digital_reporting" href="#telemetrix.telemetrix.Telemetrix.enable_digital_reporting">enable_digital_reporting</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.i2c_read" href="#telemetrix.telemetrix.Telemetrix.i2c_read">i2c_read</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.i2c_read_restart_transmission" href="#telemetrix.telemetrix.Telemetrix.i2c_read_restart_transmission">i2c_read_restart_transmission</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.i2c_write" href="#telemetrix.telemetrix.Telemetrix.i2c_write">i2c_write</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.loop_back" href="#telemetrix.telemetrix.Telemetrix.loop_back">loop_back</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_crc8" href="#telemetrix.telemetrix.Telemetrix.onewire_crc8">onewire_crc8</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_read" href="#telemetrix.telemetrix.Telemetrix.onewire_read">onewire_read</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_reset" href="#telemetrix.telemetrix.Telemetrix.onewire_reset">onewire_reset</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_reset_search" href="#telemetrix.telemetrix.Telemetrix.onewire_reset_search">onewire_reset_search</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_search" href="#telemetrix.telemetrix.Telemetrix.onewire_search">onewire_search</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_select" href="#telemetrix.telemetrix.Telemetrix.onewire_select">onewire_select</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_skip" href="#telemetrix.telemetrix.Telemetrix.onewire_skip">onewire_skip</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.onewire_write" href="#telemetrix.telemetrix.Telemetrix.onewire_write">onewire_write</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.servo_detach" href="#telemetrix.telemetrix.Telemetrix.servo_detach">servo_detach</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.servo_write" href="#telemetrix.telemetrix.Telemetrix.servo_write">servo_write</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_analog_scan_interval" href="#telemetrix.telemetrix.Telemetrix.set_analog_scan_interval">set_analog_scan_interval</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_input" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_input">set_pin_mode_analog_input</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_output" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_analog_output">set_pin_mode_analog_output</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_dht" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_dht">set_pin_mode_dht</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input">set_pin_mode_digital_input</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input_pullup" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_input_pullup">set_pin_mode_digital_input_pullup</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_output" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_digital_output">set_pin_mode_digital_output</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_i2c" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_i2c">set_pin_mode_i2c</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_one_wire" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_one_wire">set_pin_mode_one_wire</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_servo" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_servo">set_pin_mode_servo</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_sonar" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_sonar">set_pin_mode_sonar</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_spi" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_spi">set_pin_mode_spi</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.set_pin_mode_stepper" href="#telemetrix.telemetrix.Telemetrix.set_pin_mode_stepper">set_pin_mode_stepper</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.shutdown" href="#telemetrix.telemetrix.Telemetrix.shutdown">shutdown</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.spi_cs_control" href="#telemetrix.telemetrix.Telemetrix.spi_cs_control">spi_cs_control</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.spi_read_blocking" href="#telemetrix.telemetrix.Telemetrix.spi_read_blocking">spi_read_blocking</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.spi_set_format" href="#telemetrix.telemetrix.Telemetrix.spi_set_format">spi_set_format</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.spi_write_blocking" href="#telemetrix.telemetrix.Telemetrix.spi_write_blocking">spi_write_blocking</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_disable_outputs" href="#telemetrix.telemetrix.Telemetrix.stepper_disable_outputs">stepper_disable_outputs</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_enable_outputs" href="#telemetrix.telemetrix.Telemetrix.stepper_enable_outputs">stepper_enable_outputs</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_get_current_position" href="#telemetrix.telemetrix.Telemetrix.stepper_get_current_position">stepper_get_current_position</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_get_distance_to_go" href="#telemetrix.telemetrix.Telemetrix.stepper_get_distance_to_go">stepper_get_distance_to_go</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_get_max_speed" href="#telemetrix.telemetrix.Telemetrix.stepper_get_max_speed">stepper_get_max_speed</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_get_speed" href="#telemetrix.telemetrix.Telemetrix.stepper_get_speed">stepper_get_speed</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_get_target_position" href="#telemetrix.telemetrix.Telemetrix.stepper_get_target_position">stepper_get_target_position</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_is_running" href="#telemetrix.telemetrix.Telemetrix.stepper_is_running">stepper_is_running</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_move" href="#telemetrix.telemetrix.Telemetrix.stepper_move">stepper_move</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_move_to" href="#telemetrix.telemetrix.Telemetrix.stepper_move_to">stepper_move_to</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_run" href="#telemetrix.telemetrix.Telemetrix.stepper_run">stepper_run</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_run_speed" href="#telemetrix.telemetrix.Telemetrix.stepper_run_speed">stepper_run_speed</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_run_speed_to_position" href="#telemetrix.telemetrix.Telemetrix.stepper_run_speed_to_position">stepper_run_speed_to_position</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_3_pins_inverted" href="#telemetrix.telemetrix.Telemetrix.stepper_set_3_pins_inverted">stepper_set_3_pins_inverted</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_4_pins_inverted" href="#telemetrix.telemetrix.Telemetrix.stepper_set_4_pins_inverted">stepper_set_4_pins_inverted</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_acceleration" href="#telemetrix.telemetrix.Telemetrix.stepper_set_acceleration">stepper_set_acceleration</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_current_position" href="#telemetrix.telemetrix.Telemetrix.stepper_set_current_position">stepper_set_current_position</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_enable_pin" href="#telemetrix.telemetrix.Telemetrix.stepper_set_enable_pin">stepper_set_enable_pin</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_max_speed" href="#telemetrix.telemetrix.Telemetrix.stepper_set_max_speed">stepper_set_max_speed</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_min_pulse_width" href="#telemetrix.telemetrix.Telemetrix.stepper_set_min_pulse_width">stepper_set_min_pulse_width</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_set_speed" href="#telemetrix.telemetrix.Telemetrix.stepper_set_speed">stepper_set_speed</a></code></li>
-<li><code><a title="telemetrix.telemetrix.Telemetrix.stepper_stop" href="#telemetrix.telemetrix.Telemetrix.stepper_stop">stepper_stop</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.analog_write" href="#firmetix.firmetix.Frimetix.analog_write">analog_write</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.digital_write" href="#firmetix.firmetix.Frimetix.digital_write">digital_write</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.disable_all_reporting" href="#firmetix.firmetix.Frimetix.disable_all_reporting">disable_all_reporting</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.disable_analog_reporting" href="#firmetix.firmetix.Frimetix.disable_analog_reporting">disable_analog_reporting</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.disable_digital_reporting" href="#firmetix.firmetix.Frimetix.disable_digital_reporting">disable_digital_reporting</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.enable_analog_reporting" href="#firmetix.firmetix.Frimetix.enable_analog_reporting">enable_analog_reporting</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.enable_digital_reporting" href="#firmetix.firmetix.Frimetix.enable_digital_reporting">enable_digital_reporting</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.i2c_read" href="#firmetix.firmetix.Frimetix.i2c_read">i2c_read</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.i2c_read_restart_transmission" href="#firmetix.firmetix.Frimetix.i2c_read_restart_transmission">i2c_read_restart_transmission</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.i2c_write" href="#firmetix.firmetix.Frimetix.i2c_write">i2c_write</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.loop_back" href="#firmetix.firmetix.Frimetix.loop_back">loop_back</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.no_tone" href="#firmetix.firmetix.Frimetix.no_tone">no_tone</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_crc8" href="#firmetix.firmetix.Frimetix.onewire_crc8">onewire_crc8</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_read" href="#firmetix.firmetix.Frimetix.onewire_read">onewire_read</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_reset" href="#firmetix.firmetix.Frimetix.onewire_reset">onewire_reset</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_reset_search" href="#firmetix.firmetix.Frimetix.onewire_reset_search">onewire_reset_search</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_search" href="#firmetix.firmetix.Frimetix.onewire_search">onewire_search</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_select" href="#firmetix.firmetix.Frimetix.onewire_select">onewire_select</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_skip" href="#firmetix.firmetix.Frimetix.onewire_skip">onewire_skip</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.onewire_write" href="#firmetix.firmetix.Frimetix.onewire_write">onewire_write</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.servo_detach" href="#firmetix.firmetix.Frimetix.servo_detach">servo_detach</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.servo_write" href="#firmetix.firmetix.Frimetix.servo_write">servo_write</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_analog_scan_interval" href="#firmetix.firmetix.Frimetix.set_analog_scan_interval">set_analog_scan_interval</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_analog_input" href="#firmetix.firmetix.Frimetix.set_pin_mode_analog_input">set_pin_mode_analog_input</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_analog_output" href="#firmetix.firmetix.Frimetix.set_pin_mode_analog_output">set_pin_mode_analog_output</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_dht" href="#firmetix.firmetix.Frimetix.set_pin_mode_dht">set_pin_mode_dht</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_digital_input" href="#firmetix.firmetix.Frimetix.set_pin_mode_digital_input">set_pin_mode_digital_input</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_digital_input_pullup" href="#firmetix.firmetix.Frimetix.set_pin_mode_digital_input_pullup">set_pin_mode_digital_input_pullup</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_digital_output" href="#firmetix.firmetix.Frimetix.set_pin_mode_digital_output">set_pin_mode_digital_output</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_i2c" href="#firmetix.firmetix.Frimetix.set_pin_mode_i2c">set_pin_mode_i2c</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_one_wire" href="#firmetix.firmetix.Frimetix.set_pin_mode_one_wire">set_pin_mode_one_wire</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_servo" href="#firmetix.firmetix.Frimetix.set_pin_mode_servo">set_pin_mode_servo</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_sonar" href="#firmetix.firmetix.Frimetix.set_pin_mode_sonar">set_pin_mode_sonar</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_spi" href="#firmetix.firmetix.Frimetix.set_pin_mode_spi">set_pin_mode_spi</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_stepper" href="#firmetix.firmetix.Frimetix.set_pin_mode_stepper">set_pin_mode_stepper</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.set_pin_mode_tone" href="#firmetix.firmetix.Frimetix.set_pin_mode_tone">set_pin_mode_tone</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.shutdown" href="#firmetix.firmetix.Frimetix.shutdown">shutdown</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.spi_cs_control" href="#firmetix.firmetix.Frimetix.spi_cs_control">spi_cs_control</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.spi_read_blocking" href="#firmetix.firmetix.Frimetix.spi_read_blocking">spi_read_blocking</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.spi_set_format" href="#firmetix.firmetix.Frimetix.spi_set_format">spi_set_format</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.spi_write_blocking" href="#firmetix.firmetix.Frimetix.spi_write_blocking">spi_write_blocking</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_disable_outputs" href="#firmetix.firmetix.Frimetix.stepper_disable_outputs">stepper_disable_outputs</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_enable_outputs" href="#firmetix.firmetix.Frimetix.stepper_enable_outputs">stepper_enable_outputs</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_get_current_position" href="#firmetix.firmetix.Frimetix.stepper_get_current_position">stepper_get_current_position</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_get_distance_to_go" href="#firmetix.firmetix.Frimetix.stepper_get_distance_to_go">stepper_get_distance_to_go</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_get_max_speed" href="#firmetix.firmetix.Frimetix.stepper_get_max_speed">stepper_get_max_speed</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_get_speed" href="#firmetix.firmetix.Frimetix.stepper_get_speed">stepper_get_speed</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_get_target_position" href="#firmetix.firmetix.Frimetix.stepper_get_target_position">stepper_get_target_position</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_is_running" href="#firmetix.firmetix.Frimetix.stepper_is_running">stepper_is_running</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_move" href="#firmetix.firmetix.Frimetix.stepper_move">stepper_move</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_move_to" href="#firmetix.firmetix.Frimetix.stepper_move_to">stepper_move_to</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_run" href="#firmetix.firmetix.Frimetix.stepper_run">stepper_run</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_run_speed" href="#firmetix.firmetix.Frimetix.stepper_run_speed">stepper_run_speed</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_run_speed_to_position" href="#firmetix.firmetix.Frimetix.stepper_run_speed_to_position">stepper_run_speed_to_position</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_3_pins_inverted" href="#firmetix.firmetix.Frimetix.stepper_set_3_pins_inverted">stepper_set_3_pins_inverted</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_4_pins_inverted" href="#firmetix.firmetix.Frimetix.stepper_set_4_pins_inverted">stepper_set_4_pins_inverted</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_acceleration" href="#firmetix.firmetix.Frimetix.stepper_set_acceleration">stepper_set_acceleration</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_current_position" href="#firmetix.firmetix.Frimetix.stepper_set_current_position">stepper_set_current_position</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_enable_pin" href="#firmetix.firmetix.Frimetix.stepper_set_enable_pin">stepper_set_enable_pin</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_max_speed" href="#firmetix.firmetix.Frimetix.stepper_set_max_speed">stepper_set_max_speed</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_min_pulse_width" href="#firmetix.firmetix.Frimetix.stepper_set_min_pulse_width">stepper_set_min_pulse_width</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_set_speed" href="#firmetix.firmetix.Frimetix.stepper_set_speed">stepper_set_speed</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.stepper_stop" href="#firmetix.firmetix.Frimetix.stepper_stop">stepper_stop</a></code></li>
+<li><code><a title="firmetix.firmetix.Frimetix.tone" href="#firmetix.firmetix.Frimetix.tone">tone</a></code></li>
 </ul>
 </li>
 </ul>
