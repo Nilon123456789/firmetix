@@ -80,6 +80,10 @@ class Frimetix(threading.Thread):
         self.the_reporter_thread = threading.Thread(target=self._reporter)
         self.the_reporter_thread.daemon = True
 
+        # create a thread to send serial data
+        self.the_sender_thread = threading.Thread(target=self._send_command)
+        self.the_sender_thread.daemon = True
+
         self.ip_address = ip_address
         self.ip_port = ip_port
 
@@ -170,6 +174,15 @@ class Frimetix(threading.Thread):
         self.report_dispatch.update(
             {PrivateConstants.FEATURES:
                  self._features_report})
+        self.report_dispatch.update(
+            {PrivateConstants.MAX_PIN_REPORT: self._max_pin_message})
+
+        # List of the command to send [command, type]
+        self.__command_queue = []
+
+        self.__max_number_of_digital_pins = 0
+        self.__max_number_of_analog_pins = 0
+        self.__first_analog_pin = 0
 
         # dictionaries to store the callbacks for each pin
         self.analog_callbacks = {}
@@ -263,6 +276,7 @@ class Frimetix(threading.Thread):
 
         self.the_reporter_thread.start()
         self.the_data_receive_thread.start()
+        self.the_sender_thread.start()
 
         print(f"Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
               f"Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n")
@@ -315,21 +329,26 @@ class Frimetix(threading.Thread):
             raise RuntimeError(f'Frimetix4Arduino firmware version')
 
         else:
-            if self.firmware_version[0] < 5:
-                raise RuntimeError('Please upgrade the server firmware to version 5.0.0 or greater')
+            if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
+                raise RuntimeError('Please upgrade the server firmware to version '+ str(PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
             print(f'FrimetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
-        self._send_command(command)
+        self._add_command(command, False)
 
         # get the features list
         command = [PrivateConstants.GET_FEATURES]
-        self._send_command(command)
+        self._add_command(command, False)
+        time.sleep(.2)
+
+        # get the maximum number of pins
+        command = [PrivateConstants.GET_MAX_PINS]
+        self._add_command(command, False)
         time.sleep(.2)
 
         # Have the server reset its data structures
         command = [PrivateConstants.RESET]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def _find_arduino(self):
         """
@@ -425,6 +444,27 @@ class Frimetix(threading.Thread):
                 self.shutdown()
             raise RuntimeError('User Hit Control-C')
 
+    @property
+    def max_number_of_digital_pins(self):
+        """
+        Returns the maximum number of digital pins on the Arduino board (digital pins + analog pins)
+        """
+        return self.__max_number_of_digital_pins
+    
+    @property
+    def max_number_of_analog_pins(self):
+        """
+        Returns the maximum number of analog pins on the Arduino board
+        """
+        return self.__max_number_of_analog_pins
+    
+    @property
+    def first_analog_pin(self):
+        """
+        Returns the first analog pin on the Arduino board 
+        """
+        return self.__first_analog_pin
+
     def analog_write(self, pin, value):
         """
         Set the specified pin to the specified value.
@@ -434,10 +474,13 @@ class Frimetix(threading.Thread):
         :param value: pin value (maximum 16 bits)
 
         """
+        if not self.is_valid_pin(pin, False):
+            raise ValueError(f'Invalid Pin: {pin}')
+
         value_msb = value >> 8
         value_lsb = value & 0xff
         command = [PrivateConstants.ANALOG_WRITE, pin, value_msb, value_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def digital_write(self, pin, value):
         """
@@ -448,9 +491,10 @@ class Frimetix(threading.Thread):
         :param value: pin value (1 or 0)
 
         """
-
+        if not self.is_valid_pin(pin, False):
+            raise ValueError(f'Invalid Pin: {pin}')
         command = [PrivateConstants.DIGITAL_WRITE, pin, value]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def disable_all_reporting(self):
         """
@@ -458,7 +502,7 @@ class Frimetix(threading.Thread):
         """
         command = [PrivateConstants.MODIFY_REPORTING,
                    PrivateConstants.REPORTING_DISABLE_ALL, 0]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def disable_analog_reporting(self, pin):
         """
@@ -469,7 +513,7 @@ class Frimetix(threading.Thread):
         """
         command = [PrivateConstants.MODIFY_REPORTING,
                    PrivateConstants.REPORTING_ANALOG_DISABLE, pin]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def disable_digital_reporting(self, pin):
         """
@@ -480,7 +524,7 @@ class Frimetix(threading.Thread):
         """
         command = [PrivateConstants.MODIFY_REPORTING,
                    PrivateConstants.REPORTING_DIGITAL_DISABLE, pin]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def enable_analog_reporting(self, pin):
         """
@@ -492,7 +536,7 @@ class Frimetix(threading.Thread):
         """
         command = [PrivateConstants.MODIFY_REPORTING,
                    PrivateConstants.REPORTING_ANALOG_ENABLE, pin]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def enable_digital_reporting(self, pin):
         """
@@ -503,7 +547,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.MODIFY_REPORTING,
                    PrivateConstants.REPORTING_DIGITAL_ENABLE, pin]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def _get_arduino_id(self):
         """
@@ -511,7 +555,7 @@ class Frimetix(threading.Thread):
 
         """
         command = [PrivateConstants.ARE_U_THERE]
-        self._send_command(command)
+        self._add_command(command, False)
         # provide time for the reply
         time.sleep(.5)
 
@@ -522,7 +566,18 @@ class Frimetix(threading.Thread):
 
         """
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
-        self._send_command(command)
+        self._add_command(command, False)
+        # provide time for the reply
+        time.sleep(.5)
+    
+    def _get_max_pins(self):
+        """
+        This method retrieves the
+        arduino-frimetix max pins
+
+        """
+        command = [PrivateConstants.GET_MAX_PINS]
+        self._add_command(command, False)
         # provide time for the reply
         time.sleep(.5)
 
@@ -666,7 +721,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.I2C_READ, address, register, number_of_bytes,
                    stop_transmission, i2c_port, write_register]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def i2c_write(self, address, args, i2c_port=0):
         """
@@ -699,7 +754,7 @@ class Frimetix(threading.Thread):
         for item in args:
             command.append(item)
 
-        self._send_command(command)
+        self._add_command(command, True)
 
     def loop_back(self, start_character, callback=None):
         """
@@ -714,7 +769,7 @@ class Frimetix(threading.Thread):
         """
         command = [PrivateConstants.LOOP_COMMAND, ord(start_character)]
         self.loop_back_callback = callback
-        self._send_command(command)
+        self._add_command(command, False)
 
     def set_analog_scan_interval(self, interval):
         """
@@ -725,7 +780,7 @@ class Frimetix(threading.Thread):
 
         if 0 <= interval <= 255:
             command = [PrivateConstants.SET_ANALOG_SCANNING_INTERVAL, interval]
-            self._send_command(command)
+            self._add_command(command, False)
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -836,12 +891,12 @@ class Frimetix(threading.Thread):
                 return
 
         command = [PrivateConstants.I2C_BEGIN, i2c_port]
-        self._send_command(command)
+        self._add_command(command, False)
 
-    def set_pin_mode_dht(self, pin, callback=None, dht_type=22):
+    def set_pin_mode_dht(self, pin_number, callback=None, dht_type=22):
         """
 
-        :param pin: connection pin
+        :param pin_number: connection pin
 
         :param callback: callback function
 
@@ -855,6 +910,9 @@ class Frimetix(threading.Thread):
 
         DHT_REPORT_TYPE = 12
         """
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
+
         if self.reported_features & PrivateConstants.DHT_FEATURE:
             if not callback:
                 if self.shutdown_on_exception:
@@ -862,19 +920,19 @@ class Frimetix(threading.Thread):
                 raise RuntimeError('set_pin_mode_dht: A Callback must be specified')
 
             if self.dht_count < PrivateConstants.MAX_DHTS - 1:
-                self.dht_callbacks[pin] = callback
+                self.dht_callbacks[pin_number] = callback
                 self.dht_count += 1
 
                 if dht_type != 22 and dht_type != 11:
                     dht_type = 22
 
-                command = [PrivateConstants.DHT_NEW, pin, dht_type]
-                self._send_command(command)
+                command = [PrivateConstants.DHT_NEW, pin_number, dht_type]
+                self._add_command(command, False)
             else:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f'Maximum Number Of DHTs Exceeded - set_pin_mode_dht fails for pin {pin}')
+                    f'Maximum Number Of DHTs Exceeded - set_pin_mode_dht fails for pin {pin_number}')
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -893,6 +951,9 @@ class Frimetix(threading.Thread):
         :param max_pulse: maximum pulse width
 
         """
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
+
         if self.reported_features & PrivateConstants.SERVO_FEATURE:
 
             minv = (min_pulse).to_bytes(2, byteorder="big")
@@ -900,7 +961,7 @@ class Frimetix(threading.Thread):
 
             command = [PrivateConstants.SERVO_ATTACH, pin_number,
                        minv[0], minv[1], maxv[0], maxv[1]]
-            self._send_command(command)
+            self._add_command(command, False)
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -919,6 +980,11 @@ class Frimetix(threading.Thread):
         callback data: [PrivateConstants.SONAR_DISTANCE, trigger_pin, distance_value, time_stamp]
 
         """
+        if not self.is_valid_pin(trigger_pin, False):
+            raise ValueError(f'Invalid Pin: {trigger_pin}')
+        if not self.is_valid_pin(echo_pin, False):
+            raise ValueError(f'Invalid Pin: {echo_pin}')
+
         if self.reported_features & PrivateConstants.SONAR_FEATURE:
 
             if not callback:
@@ -931,7 +997,7 @@ class Frimetix(threading.Thread):
                 self.sonar_count += 1
 
                 command = [PrivateConstants.SONAR_NEW, trigger_pin, echo_pin]
-                self._send_command(command)
+                self._add_command(command, False)
             else:
                 if self.shutdown_on_exception:
                     self.shutdown()
@@ -976,7 +1042,7 @@ class Frimetix(threading.Thread):
             for pin in chip_select_list:
                 command.append(pin)
                 self.cs_pins_enabled.append(pin)
-            self._send_command(command)
+            self._add_command(command, False)
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -1044,7 +1110,7 @@ class Frimetix(threading.Thread):
             # build message and send message to server
             command = [PrivateConstants.SET_PIN_MODE_STEPPER, motor_id, interface, pin1,
                        pin2, pin3, pin4, enable]
-            self._send_command(command)
+            self._add_command(command, False)
 
             # return motor id
             return motor_id
@@ -1069,7 +1135,9 @@ class Frimetix(threading.Thread):
         :param frequency:
         :param duration: in millisecond (0 = play tone continuously)
         """
-
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
+            
         freq_msb = frequency >> 8
         freq_lsb = frequency & 0xff
 
@@ -1082,7 +1150,7 @@ class Frimetix(threading.Thread):
             dur_lsb = duration & 0xff
 
         command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
     
     def no_tone(self, pin_number):
         """
@@ -1090,8 +1158,11 @@ class Frimetix(threading.Thread):
 
         :param pin_number:
         """
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
+
         command = [PrivateConstants.NO_TONE, pin_number]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def servo_write(self, pin_number, angle):
         """
@@ -1103,8 +1174,11 @@ class Frimetix(threading.Thread):
         :param angle: angle (0-180)
 
         """
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
+
         command = [PrivateConstants.SERVO_WRITE, pin_number, angle]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def servo_detach(self, pin_number):
         """
@@ -1113,8 +1187,10 @@ class Frimetix(threading.Thread):
         :param pin_number: attached pin
 
         """
+        if not self.is_valid_pin(pin_number, False):
+            raise ValueError(f'Invalid Pin: {pin_number}')
         command = [PrivateConstants.SERVO_DETACH, pin_number]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_move_to(self, motor_id, position):
         """
@@ -1148,7 +1224,7 @@ class Frimetix(threading.Thread):
         for value in position_bytes:
             command.append(value)
         command.append(polarity)
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_move(self, motor_id, relative_position):
         """
@@ -1177,7 +1253,7 @@ class Frimetix(threading.Thread):
         for value in position_bytes:
             command.append(value)
         command.append(polarity)
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_run(self, motor_id, completion_callback=None):
         """
@@ -1209,7 +1285,7 @@ class Frimetix(threading.Thread):
 
         self.stepper_info_list[motor_id]['motion_complete_callback'] = completion_callback
         command = [PrivateConstants.STEPPER_RUN, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_run_speed(self, motor_id):
         """
@@ -1227,7 +1303,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError('stepper_run_speed: Invalid motor_id.')
 
         command = [PrivateConstants.STEPPER_RUN_SPEED, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_max_speed(self, motor_id, max_speed):
         """
@@ -1261,7 +1337,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.STEPPER_SET_MAX_SPEED, motor_id, max_speed_msb,
                    max_speed_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_get_max_speed(self, motor_id):
         """
@@ -1312,7 +1388,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.STEPPER_SET_ACCELERATION, motor_id, max_accel_msb,
                    max_accel_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_speed(self, motor_id, speed):
         """
@@ -1345,7 +1421,7 @@ class Frimetix(threading.Thread):
         speed_lsb = speed & 0xff
 
         command = [PrivateConstants.STEPPER_SET_SPEED, motor_id, speed_msb, speed_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_get_speed(self, motor_id):
         """
@@ -1392,7 +1468,7 @@ class Frimetix(threading.Thread):
         self.stepper_info_list[motor_id][
             'distance_to_go_callback'] = distance_to_go_callback
         command = [PrivateConstants.STEPPER_GET_DISTANCE_TO_GO, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_get_target_position(self, motor_id, target_callback):
         """
@@ -1424,7 +1500,7 @@ class Frimetix(threading.Thread):
             'target_position_callback'] = target_callback
 
         command = [PrivateConstants.STEPPER_GET_TARGET_POSITION, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_get_current_position(self, motor_id, current_position_callback):
         """
@@ -1454,7 +1530,7 @@ class Frimetix(threading.Thread):
         self.stepper_info_list[motor_id]['current_position_callback'] = current_position_callback
 
         command = [PrivateConstants.STEPPER_GET_CURRENT_POSITION, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_current_position(self, motor_id, position):
         """
@@ -1479,7 +1555,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.STEPPER_SET_CURRENT_POSITION, motor_id]
         for value in position_bytes:
             command.append(value)
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_run_speed_to_position(self, motor_id, completion_callback=None):
         """
@@ -1512,7 +1588,7 @@ class Frimetix(threading.Thread):
 
         self.stepper_info_list[motor_id]['motion_complete_callback'] = completion_callback
         command = [PrivateConstants.STEPPER_RUN_SPEED_TO_POSITION, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_stop(self, motor_id):
         """
@@ -1528,7 +1604,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError('stepper_stop: Invalid motor_id.')
 
         command = [PrivateConstants.STEPPER_STOP, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_disable_outputs(self, motor_id):
         """
@@ -1552,7 +1628,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError('stepper_disable_outputs: Invalid motor_id.')
 
         command = [PrivateConstants.STEPPER_DISABLE_OUTPUTS, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_enable_outputs(self, motor_id):
         """
@@ -1570,7 +1646,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError('stepper_enable_outputs: Invalid motor_id.')
 
         command = [PrivateConstants.STEPPER_ENABLE_OUTPUTS, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_min_pulse_width(self, motor_id, minimum_width):
         """
@@ -1600,7 +1676,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.STEPPER_SET_MINIMUM_PULSE_WIDTH, motor_id, width_msb,
                    width_lsb]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_enable_pin(self, motor_id, pin=0xff):
         """
@@ -1626,7 +1702,7 @@ class Frimetix(threading.Thread):
                                '0-0xff.')
         command = [PrivateConstants.STEPPER_SET_ENABLE_PIN, motor_id, pin]
 
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_3_pins_inverted(self, motor_id, direction=False, step=False,
                                     enable=False):
@@ -1649,7 +1725,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.STEPPER_SET_3_PINS_INVERTED, motor_id, direction,
                    step, enable]
 
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_set_4_pins_inverted(self, motor_id, pin1_invert=False, pin2_invert=False,
                                     pin3_invert=False, pin4_invert=False, enable=False):
@@ -1676,7 +1752,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.STEPPER_SET_4_PINS_INVERTED, motor_id, pin1_invert,
                    pin2_invert, pin3_invert, pin4_invert, enable]
 
-        self._send_command(command)
+        self._add_command(command, False)
 
     def stepper_is_running(self, motor_id, callback):
         """
@@ -1706,7 +1782,7 @@ class Frimetix(threading.Thread):
         self.stepper_info_list[motor_id]['is_running_callback'] = callback
 
         command = [PrivateConstants.STEPPER_IS_RUNNING, motor_id]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def _set_pin_mode(self, pin_number, pin_state, differential=0, callback=None):
         """
@@ -1726,6 +1802,13 @@ class Frimetix(threading.Thread):
                          called when pin data value changes
 
         """
+        if PrivateConstants.AT_ANALOG:
+            if not self.is_valid_pin(pin_number, True):
+                raise ValueError(f'Invalid Pin: {pin_number}')
+        else:
+            if not self.is_valid_pin(pin_number):
+                raise ValueError(f'Invalid Pin: {pin_number}')
+
         if callback:
             if pin_state == PrivateConstants.AT_INPUT:
                 self.digital_callbacks[pin_number] = callback
@@ -1759,7 +1842,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError('Unknown pin state')
 
         if command:
-            self._send_command(command)
+            self._add_command(command, False)
 
     def shutdown(self):
         """
@@ -1772,7 +1855,7 @@ class Frimetix(threading.Thread):
 
         try:
             command = [PrivateConstants.STOP_ALL_REPORTS]
-            self._send_command(command)
+            self._add_command(command, False)
             time.sleep(.5)
 
             if self.ip_address:
@@ -1811,7 +1894,7 @@ class Frimetix(threading.Thread):
                 self.shutdown()
             raise RuntimeError(f'spi_cs_control: chip select pin never enabled.')
         command = [PrivateConstants.SPI_CS_CONTROL, chip_select_pin, select]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def spi_read_blocking(self, register_selection, number_of_bytes_to_read,
                           call_back=None):
@@ -1849,7 +1932,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.SPI_READ_BLOCKING, number_of_bytes_to_read,
                    register_selection]
 
-        self._send_command(command)
+        self._add_command(command, True)
 
     def spi_set_format(self, clock_divisor, bit_order, data_mode):
         """
@@ -1884,7 +1967,7 @@ class Frimetix(threading.Thread):
 
         command = [PrivateConstants.SPI_SET_FORMAT, clock_divisor, bit_order,
                    data_mode]
-        self._send_command(command)
+        self._add_command(command, False)
 
     def spi_write_blocking(self, bytes_to_write):
         """
@@ -1910,7 +1993,7 @@ class Frimetix(threading.Thread):
         for data in bytes_to_write:
             command.append(data)
 
-        self._send_command(command)
+        self._add_command(command, True)
 
     def set_pin_mode_one_wire(self, pin):
         """
@@ -1921,7 +2004,7 @@ class Frimetix(threading.Thread):
         if self.reported_features & PrivateConstants.ONEWIRE_FEATURE:
             self.onewire_enabled = True
             command = [PrivateConstants.ONE_WIRE_INIT, pin]
-            self._send_command(command)
+            self._add_command(command, False)
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -1949,7 +2032,7 @@ class Frimetix(threading.Thread):
         self.onewire_callback = callback
 
         command = [PrivateConstants.ONE_WIRE_RESET]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def onewire_select(self, device_address):
         """
@@ -1975,7 +2058,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.ONE_WIRE_SELECT]
         for data in device_address:
             command.append(data)
-        self._send_command(command)
+        self._add_command(command, True)
 
     def onewire_skip(self):
         """
@@ -1989,7 +2072,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError(f'onewire_skip: OneWire interface is not enabled.')
 
         command = [PrivateConstants.ONE_WIRE_SKIP]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def onewire_write(self, data, power=0):
         """
@@ -2008,7 +2091,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError(f'onewire_write: OneWire interface is not enabled.')
         if 0 < data < 255:
             command = [PrivateConstants.ONE_WIRE_WRITE, data, power]
-            self._send_command(command)
+            self._add_command(command, True)
         else:
             if self.shutdown_on_exception:
                 self.shutdown()
@@ -2039,7 +2122,7 @@ class Frimetix(threading.Thread):
         self.onewire_callback = callback
 
         command = [PrivateConstants.ONE_WIRE_READ]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def onewire_reset_search(self):
         """
@@ -2053,7 +2136,7 @@ class Frimetix(threading.Thread):
                                f'enabled.')
         else:
             command = [PrivateConstants.ONE_WIRE_RESET_SEARCH]
-            self._send_command(command)
+            self._add_command(command, True)
 
     def onewire_search(self, callback=None):
         """
@@ -2082,7 +2165,7 @@ class Frimetix(threading.Thread):
         self.onewire_callback = callback
 
         command = [PrivateConstants.ONE_WIRE_SEARCH]
-        self._send_command(command)
+        self._add_command(command, True)
 
     def onewire_crc8(self, address_list, callback=None):
         """
@@ -2122,7 +2205,20 @@ class Frimetix(threading.Thread):
         for data in address_list:
             command.append(data)
 
-        self._send_command(command)
+        self._add_command(command, True)
+
+    def is_valid_pin(self, pin, analog=False):
+        """
+        Check if a pin is valid for the current board
+        :param pin: pin number to check
+        :return: True if valid, False if not
+        """
+        if analog:
+            if pin >= self.max_analog_pins:
+                return False
+        elif pin >= self.max_digital_pins:
+                return False
+        return True
 
     '''
     report message handlers
@@ -2223,6 +2319,16 @@ class Frimetix(threading.Thread):
         """
 
         self.firmware_version = [data[0], data[1], data[2]]
+    
+    def _max_pin_message(self, data):
+        """
+        Max pin message
+
+        :param data: data[0] = max digital pin, data[1] = max analog pin.
+        """
+        self.__max_number_of_digital_pins = data[0]
+        self.__max_number_of_analog_pins = data[1]
+        self.__first_analog_pin = self.__max_number_of_digital_pins - self.__max_number_of_analog_pins
 
     def _i2c_read_report(self, data):
         """
@@ -2310,29 +2416,51 @@ class Frimetix(threading.Thread):
         if self.loop_back_callback:
             self.loop_back_callback(data)
 
-    def _send_command(self, command):
+    def _add_command(self, command, continuous : bool = False):
         """
         This is a private utility method.
 
 
         :param command:  command data in the form of a list
 
+        :param continuous:     does the command require multiple calls without delay
+
         """
         # the length of the list is added at the head
         command.insert(0, len(command))
         send_message = bytes(command)
 
-        if self.serial_port:
-            try:
-                self.serial_port.write(send_message)
-            except SerialException:
-                if self.shutdown_on_exception:
-                    self.shutdown()
-                raise RuntimeError('write fail in _send_command')
-        elif self.ip_address:
-            self.sock.sendall(send_message)
-        else:
-            raise RuntimeError('No serial port or ip address set.')
+        # Add command to the queue
+        self.__command_queue.append([send_message, continuous])
+    
+    def _send_command(self):
+        """
+        This is a private utility method.
+        
+        This method will send the next command in the queue.
+        """
+        self.run_event.wait()
+
+        while self._is_running() and not self.shutdown_flag: 
+            if len(self.__command_queue) > 0:
+                action = self.__command_queue.pop(0)
+                command = action[0]
+                if self.serial_port:
+                    try:
+                        self.serial_port.write(command)
+                    except SerialException:
+                        if self.shutdown_on_exception:
+                            self.shutdown()
+                        raise RuntimeError('write fail in _send_command')
+                elif self.ip_address:
+                    self.sock.sendall(command)
+                else:
+                    raise RuntimeError('No serial port or ip address set.')
+                
+                if not action[1]: #sleep only if not continuous 
+                    time.sleep(0.1)
+            else:
+                pass
 
     def _servo_unavailable(self, report):
         """
