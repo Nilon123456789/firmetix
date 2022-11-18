@@ -1,6 +1,6 @@
 # The Firmetix Project
 
-Firmetix is a fork of the [Telemetrix](https://github.com\MrYsLab\telemetrix) project with the added suport for the tone function
+Firmetix is a fork of the [Telemetrix](https://github.com/MrYsLab/telemetrix) project with the added suport for the tone function
 
 Here is a feature comparison between Firmetix, StandardFirmata and Telemetrix:
 

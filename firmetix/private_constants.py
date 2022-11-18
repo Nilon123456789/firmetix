@@ -80,6 +80,7 @@ class PrivateConstants:
     GET_FEATURES = 54
     TONE = 55
     NO_TONE = 56
+    GET_MAX_PINS = 57
 
     # reports
     # debug data from Arduino
@@ -102,8 +103,10 @@ class PrivateConstants:
     STEPPER_RUN_COMPLETE_REPORT = 19
     FEATURES = 20
     DEBUG_PRINT = 99
+    MAX_PIN_REPORT = GET_MAX_PINS
 
-    FIRMETIX_VERSION = "1.00"
+    FIRMETIX_VERSION = "2.0.0"
+    FIRMETIX4ARDUINO_MAJOR_VERSION = 2
 
     # reporting control
     REPORTING_DISABLE_ALL = 0
@@ -121,12 +124,6 @@ class PrivateConstants:
     AT_SONAR = 5
     AT_DHT = 6
     AT_MODE_NOT_SET = 255
-
-    # maximum number of digital pins supported
-    NUMBER_OF_DIGITAL_PINS = 100
-
-    # maximum number of analog pins supported
-    NUMBER_OF_ANALOG_PINS = 20
 
     # maximum number of sonars allowed
     MAX_SONARS = 6
