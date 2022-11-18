@@ -31,6 +31,14 @@ and toggle the pin 5 times.
 # Create a Frimetix instance.
 board = firmetix.Frimetix()
 
+# Analog pins number are actually following the digital pins
+# So if you add the number of digital pins plus the number of the analog pin you get the actual pin number of the analog pin
+# You can use the proprety called first_analog_pin to get the number of the first analog pin and you only have to add the number of the analog pin
+#
+# The uno has 13 digital pins and the mega has 53 digital pins
+# Looking at the Uno: A0 = 14, A1 = 15, and so forth.
+# Looking at a Mega2560 which has 54 digital pins: A0 = 54, A1 = 55, etc. 
+
 # Set the pin to A1
 LED_PIN = board.first_analog_pin + 1
 
