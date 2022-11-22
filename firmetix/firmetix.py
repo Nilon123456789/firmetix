@@ -2214,9 +2214,9 @@ class Frimetix(threading.Thread):
         :return: True if valid, False if not
         """
         if analog:
-            if pin >= self.max_analog_pins:
+            if pin >= self.__max_number_of_analog_pins:
                 return False
-        elif pin >= self.max_digital_pins:
+        elif pin >= self.__max_number_of_digital_pins:
                 return False
         return True
 
