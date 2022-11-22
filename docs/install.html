@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+        <script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script>
+        <title>Firmetix</title>
+    </head>
+    <body>
+        <!--Navigation bar-->
+        <div id="nav-placeholder" style="position: sticky; top: 0; z-index: 1;"> </div>
+        <script> $(function(){ $("#nav-placeholder").load("nav.html");}); </script>
+
+        <h1>Installation</h1>
+        
+        <div class="install">
+        <h2>Python 3</h2>
+        
+        <p>Python 3.7 or greater is required to run Firmetix. You can download it from the official python site <a href="https://www.python.org/downloads/">here</a>.</p>
+
+        <h3>Verify python install</h3>
+        <p> To check that you have the correct version of Python 3 installed, open a command window and type: </p>
+        <code>python3 -V </code>
+        <p> Windows, you may need to type:</p>
+        <code>python -V </code>
+        <p>The Python version will be displayed: </p>
+        <pre>python3
+Python 3.7.2 (default, Dec 31 2018, 14:25:33)
+[GCC 8.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>></pre>
+        <p>For Windows users, this may look something like:</p>
+        <pre>python
+C:\Users\user_name>python
+Python 3.9.0 (tags/v3.9.0:9cf6752, Oct  5 2020, 15:34:40) [MSC v.1927 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>></pre>
+        
+        <h2>Installing Firmetix</h2>
+
+        <p> To install Firmetix, open a command window and type: </p>
+        <code>pip3 install firmetix </code>
+        <p> Windows, you may need to type:</p>
+        <code>pip install firmetix </code>
+        <p> This will install Firmetix and all of its dependencies. </p>
+        <p>The code is also available in this <a href="github.com/nilon123456789/firmetix">GitHub</a> repo</p>
+
+        <h2>Installing Firmetix4Arduino</h2>
+        <p>In the arduino IDE go in the Manage Libraries panel and search for Firmetix4Arduino</p>
+        <p>Install the library and you are ready to go</p>
+        <p>Open the example script and upload it to the arduino</p>
+        <p>You can change the ARDUINO_ID at the top of the script to have multiple arduinos</p>
+        <p>If your missing memory you can comment out,with //, one or multiple of #define Enable</p>
+        <p>The code is also available in this <a href="github.com/nilon123456789/Firmetix4Arduino">GitHub</a> repo</p>
+
+        <h2>Examples</h2>
+        <p>Here is a sample script to blink a led</p>
+        <zero-md>
+            <template>
+                
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sindresorhus/github-markdown-css@4/github-markdown.min.css">
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/PrismJS/prism@1/themes/prism.min.css">
+                <style>
+                    .markdown-body pre {
+                        margin-left: auto;
+                        margin-right: auto;
+                        width: fit-content;
+                    }
+                </style>
+              </template>
+            <script type="text/markdown">
+    import firmetix
+    import time
+
+    # Create a Firmetix board
+    firmetix = firmetix.Firmetix()
+
+    led_pin = 3
+
+    # Set the pin to output
+    firmetix.set_pin_mode_digital_output(led_pin)
+
+    while True:
+        # Turn the LED on
+        firmetix.digital_write(led_pin, 1)
+        time.sleep(1)
+
+        # Turn the LED off
+        firmetix.digital_write(led_pin, 0)
+        time.sleep(1) </script>
+          </zero-md>
+          
+        <p>Examples are available in the <a href="github.com/nilon123456789/firmetix">GitHub</a> repo</p>
+        </div>
+<!--Footer-->
+<div id="footer-placeholder"> </div>
+<script> $(function(){ $("#footer-placeholder").load("footer.html");}); </script>
+</body>
+</html>
