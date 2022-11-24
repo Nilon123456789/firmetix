@@ -1802,7 +1802,7 @@ class Frimetix(threading.Thread):
                          called when pin data value changes
 
         """
-        if PrivateConstants.AT_ANALOG:
+        if pin_state == PrivateConstants.AT_ANALOG:
             if not self.is_valid_pin(pin_number, True):
                 raise ValueError(f'Invalid Pin: {pin_number}')
         else:
@@ -2420,6 +2420,7 @@ class Frimetix(threading.Thread):
         """
         This is a private utility method.
 
+        It adds a command to the command queue.
 
         :param command:  command data in the form of a list
 
@@ -2437,7 +2438,7 @@ class Frimetix(threading.Thread):
         """
         This is a private utility method.
         
-        This method will send the next command in the queue.
+        This method will send the next command in the queue to the server.
         """
         self.run_event.wait()
 
@@ -2458,7 +2459,7 @@ class Frimetix(threading.Thread):
                     raise RuntimeError('No serial port or ip address set.')
                 
                 if not action[1]: #sleep only if not continuous 
-                    time.sleep(0.1)
+                    pass
             else:
                 pass
 
