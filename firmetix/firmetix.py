@@ -326,7 +326,7 @@ class Frimetix(threading.Thread):
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f'Frimetix4Arduino firmware version')
+            raise RuntimeError(f'Frimetix4Arduino firmware version not found')
 
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
@@ -793,7 +793,7 @@ class Frimetix(threading.Thread):
         """
         self._set_pin_mode(pin_number, PrivateConstants.AT_OUTPUT)
 
-    def set_pin_mode_analog_input(self, pin_number, differential=0, callback=None):
+    def set_pin_mode_analog_input(self, pin_number, callback, differential=0):
         """
         Set a pin as an analog input.
 
@@ -815,7 +815,7 @@ class Frimetix(threading.Thread):
         self._set_pin_mode(pin_number, PrivateConstants.AT_ANALOG, differential,
                            callback)
 
-    def set_pin_mode_digital_input(self, pin_number, callback=None):
+    def set_pin_mode_digital_input(self, pin_number, callback):
         """
         Set a pin as a digital input.
 
@@ -833,7 +833,7 @@ class Frimetix(threading.Thread):
         """
         self._set_pin_mode(pin_number, PrivateConstants.AT_INPUT, callback=callback)
 
-    def set_pin_mode_digital_input_pullup(self, pin_number, callback=None):
+    def set_pin_mode_digital_input_pullup(self, pin_number, callback):
         """
         Set a pin as a digital input with pullup enabled.
 
@@ -891,7 +891,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.I2C_BEGIN, i2c_port]
         self._add_command(command, False)
 
-    def set_pin_mode_dht(self, pin_number, callback=None, dht_type=22):
+    def set_pin_mode_dht(self, pin_number, callback, dht_type=22):
         """
 
         :param pin_number: connection pin
@@ -966,7 +966,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError(f'The SERVO feature is disabled in the server.')
 
     def set_pin_mode_sonar(self, trigger_pin, echo_pin,
-                           callback=None):
+                           callback):
         """
 
         :param trigger_pin:
