@@ -342,9 +342,7 @@ class Frimetix(threading.Thread):
         time.sleep(.2)
 
         # get the maximum number of pins
-        command = [PrivateConstants.GET_MAX_PINS]
-        self._add_command(command, False)
-        time.sleep(.2)
+        self._get_max_pins()
 
         # Have the server reset its data structures
         command = [PrivateConstants.RESET]
@@ -579,7 +577,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.GET_MAX_PINS]
         self._add_command(command, False)
         # provide time for the reply
-        time.sleep(.5)
+        time.sleep(.2)
 
     def i2c_read(self, address, register, number_of_bytes,
                  callback=None, i2c_port=0,
@@ -2459,7 +2457,7 @@ class Frimetix(threading.Thread):
                     raise RuntimeError('No serial port or ip address set.')
                 
                 if not action[1]: #sleep only if not continuous 
-                    pass
+                    time.sleep(0.1)
             else:
                 pass
 
