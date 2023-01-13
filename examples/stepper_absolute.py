@@ -122,7 +122,7 @@ def step_absolute(the_board):
 
 
 # instantiate Frimetix
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 try:
     # start the main function
     step_absolute(board)

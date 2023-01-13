@@ -32,7 +32,7 @@ and toggle the pin 5 times.
 DIGITAL_PIN = 6  # the board LED
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_digital_output(DIGITAL_PIN)

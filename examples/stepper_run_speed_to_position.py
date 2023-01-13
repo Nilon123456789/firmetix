@@ -26,7 +26,7 @@ Run a motor using runSpeedToPosition position
 """
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 
 def the_callback(data):

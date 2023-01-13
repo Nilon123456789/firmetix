@@ -40,7 +40,7 @@ def pcf8574(my_board):
     time.sleep(0.5)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 try:
     pcf8574(board)
 except KeyboardInterrupt:

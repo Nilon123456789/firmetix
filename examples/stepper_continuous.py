@@ -28,7 +28,7 @@ Run a motor continuously without acceleration
 """
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 
 # for continuous motion, the callback is not used, but provided to meet the

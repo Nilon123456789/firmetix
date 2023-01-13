@@ -19,7 +19,7 @@ from firmetix import firmetix
 from time import sleep
 
 # Create a Telemetrix object
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 # Defining the pin
 PIEZO_PIN = 3

@@ -32,7 +32,7 @@ Setup a pin for output and fade its intensity
 DIGITAL_PIN = 6
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_analog_output(DIGITAL_PIN)

@@ -82,7 +82,7 @@ def dht(my_board, pin, callback, dht_type):
     my_board.set_pin_mode_dht(pin, callback, dht_type)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 try:
     dht(board, 8, the_callback, 11)
     dht(board, 9, the_callback, 22)

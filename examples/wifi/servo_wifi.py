@@ -31,7 +31,7 @@ Attach a pin to a servo and move it about.
 SERVO_PIN = 4
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix(ip_address='192.168.2.220')
+board = firmetix.Firmetix(ip_address='192.168.2.220')
 board.set_pin_mode_servo(SERVO_PIN)
 time.sleep(.2)
 board.servo_write(SERVO_PIN, 90)

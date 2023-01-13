@@ -51,7 +51,7 @@ def loop_back(my_board, loop_back_data):
         sys.exit(0)
 
 
-board = firmetix.Frimetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(ip_address='192.168.2.112')
 char_list = ['A', 'B', 'Z']
 try:
     loop_back(board, char_list)

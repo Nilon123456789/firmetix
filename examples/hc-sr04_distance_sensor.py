@@ -65,7 +65,7 @@ def sonar(my_board, trigger_pin, echo_pin, callback):
             sys.exit(0)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 try:
     sonar(board, TRIGGER_PIN, ECHO_PIN, the_callback)
     board.shutdown()

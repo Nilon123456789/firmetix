@@ -106,7 +106,7 @@ def step_relative(the_board):
 
 
 # instantiate Frimetix
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 
 try:

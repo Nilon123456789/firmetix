@@ -79,7 +79,7 @@ def analog_in(my_board, pin):
         sys.exit(0)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 try:
     analog_in(board, ANALOG_PIN)

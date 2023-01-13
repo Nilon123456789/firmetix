@@ -51,7 +51,7 @@ def loop_back(my_board, loop_back_data):
         sys.exit(0)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 char_list = ['A', 'B', 'Z']
 try:
     loop_back(board, char_list)

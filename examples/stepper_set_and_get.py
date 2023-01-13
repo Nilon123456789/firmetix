@@ -24,7 +24,7 @@ from firmetix import firmetix
 
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 
 def current_position_callback(data):

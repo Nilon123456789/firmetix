@@ -58,7 +58,7 @@ class OneWireTemp:
 
         # instantiate the library
         try:
-            self.board = firmetix.Frimetix(ip_address='192.168.2.112')
+            self.board = firmetix.Firmetix(ip_address='192.168.2.112')
         except (KeyboardInterrupt, serial.serialutil.SerialException):
             print('User abort')
             sys.exit(0)

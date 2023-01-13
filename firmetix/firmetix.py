@@ -32,9 +32,9 @@ from firmetix.private_constants import PrivateConstants
 
 
 # noinspection PyPep8,PyMethodMayBeStatic,GrazieInspection,PyBroadException,PyCallingNonCallable
-class Frimetix(threading.Thread):
+class Firmetix(threading.Thread):
     """
-    This class exposes and implements the frimetix API.
+    This class exposes and implements the firmetix API.
     It uses threading to accommodate concurrency.
     It includes the public API methods as well as
     a set of private methods.
@@ -283,7 +283,7 @@ class Frimetix(threading.Thread):
         self.the_data_receive_thread.start()
         self.the_sender_thread.start()
 
-        print(f"Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
+        print(f"Firmetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
               f"Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n")
 
         # using the serial link
@@ -325,18 +325,18 @@ class Frimetix(threading.Thread):
         print(f'Waiting for Arduino to reset')
         print(f'Reset Complete')
 
-        # get frimetix firmware version and print it
-        print('\nRetrieving Frimetix4Arduino firmware ID...')
+        # get firmetix firmware version and print it
+        print('\nRetrieving Firmetix4Arduino firmware ID...')
         self._get_firmware_version()
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f'Frimetix4Arduino firmware version not found')
+            raise RuntimeError(f'Firmetix4Arduino firmware version not found')
 
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
                 raise RuntimeError('Please upgrade the server firmware to version '+ str(PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
-            print(f'FrimetixArduino firmware version: {self.firmware_version[0]}.'
+            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._add_command(command, False)
@@ -348,6 +348,9 @@ class Frimetix(threading.Thread):
 
         # get the maximum number of pins
         self._get_max_pins()
+        time.sleep(.2)
+
+        print("\nFirmetix4Arduino is ready to use\n")
 
         # Have the server reset its data structures
         command = [PrivateConstants.RESET]
@@ -359,7 +362,7 @@ class Frimetix(threading.Thread):
         containing a sketch that has a matching arduino_instance_id as
         specified in the input parameters of this class.
 
-        This is used explicitly with the Frimetix4Arduino sketch.
+        This is used explicitly with the Firmetix4Arduino sketch.
         """
 
         # a list of serial ports to be checked
@@ -384,7 +387,7 @@ class Frimetix(threading.Thread):
             # clear out any possible data in the input buffer
         # wait for arduino to reset
         print(
-            f'\nWaiting {self.arduino_wait} seconds(arduino_wait) for Arduino devices to '
+            f'\nWaiting {self.arduino_wait} seconds for Arduino devices to '
             'reset...')
         # temporary for testing
         time.sleep(self.arduino_wait)
@@ -397,7 +400,7 @@ class Frimetix(threading.Thread):
             if self.reported_arduino_id != self.arduino_instance_id:
                 continue
             else:
-                print('Valid Arduino ID Found.')
+                print(f'Valid Arduino ID Found. | ID = {self.reported_arduino_id}')
                 self.serial_port.reset_input_buffer()
                 self.serial_port.reset_output_buffer()
                 return
@@ -428,19 +431,19 @@ class Frimetix(threading.Thread):
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(f'Incorrect Arduino ID: {self.reported_arduino_id}')
-            print('Valid Arduino ID Found.')
+            print(f'Valid Arduino ID Found. | ID = {self.reported_arduino_id}')
             # get arduino firmware version and print it
-            print('\nRetrieving Frimetix4Arduino firmware ID...')
+            print('\nRetrieving Firmetix4Arduino firmware ID...')
             self._get_firmware_version()
 
             if not self.firmware_version:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f'Frimetix4Arduino Sketch Firmware Version Not Found')
+                    f'Firmetix4Arduino Sketch Firmware Version Not Found')
 
             else:
-                print(f'Frimetix4Arduino firmware version: {self.firmware_version[0]}.'
+                print(f'Firmetix4Arduino firmware version: {self.firmware_version[0]}.'
                       f'{self.firmware_version[1]}')
         except KeyboardInterrupt:
             if self.shutdown_on_exception:
@@ -554,7 +557,7 @@ class Frimetix(threading.Thread):
 
     def _get_arduino_id(self):
         """
-        Retrieve arduino-frimetix arduino id
+        Retrieve arduino-firmetix arduino id
 
         """
         command = [PrivateConstants.ARE_U_THERE]
@@ -565,7 +568,7 @@ class Frimetix(threading.Thread):
     def _get_firmware_version(self):
         """
         This method retrieves the
-        arduino-frimetix firmware version
+        arduino-firmetix firmware version
 
         """
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
@@ -576,7 +579,7 @@ class Frimetix(threading.Thread):
     def _get_max_pins(self):
         """
         This method retrieves the
-        arduino-frimetix max pins
+        arduino-firmetix max pins
 
         """
         command = [PrivateConstants.GET_MAX_PINS]
@@ -2216,11 +2219,10 @@ class Frimetix(threading.Thread):
         :param pin: pin number to check
         :return: True if valid, False if not
         """
-        if analog:
-            if pin >= self.__max_number_of_analog_pins:
-                return False
+        if analog and pin >= self.__max_number_of_analog_pins:
+            return False
         elif pin >= self.__max_number_of_digital_pins:
-                return False
+            return False
         return True
 
     '''
@@ -2314,7 +2316,7 @@ class Frimetix(threading.Thread):
 
     def _firmware_message(self, data):
         """
-        Frimetix4Arduino firmware version message
+        Firmetix4Arduino firmware version message
 
         :param data: data[0] = major number, data[1] = minor number.
 
@@ -2329,9 +2331,17 @@ class Frimetix(threading.Thread):
 
         :param data: data[0] = max digital pin, data[1] = max analog pin.
         """
+        print(f'Found {data[0]} digital pins and {data[1]} analog pins')
+
+        if data[0] == 0 or data[1] == 0:
+            if self.shutdown_on_exception:
+                self.shutdown()
+            raise ValueError('Got empty max pin message.')
+        
         self.__max_number_of_digital_pins = data[0]
         self.__max_number_of_analog_pins = data[1]
         self.__first_analog_pin = self.__max_number_of_digital_pins - self.__max_number_of_analog_pins
+        
 
     def _i2c_read_report(self, data):
         """
