@@ -45,7 +45,7 @@ class Frimetix(threading.Thread):
     def __init__(self, com_port=None, arduino_instance_id=1,
                  arduino_wait=4, sleep_tune=0.000001,
                  shutdown_on_exception=True,
-                 ip_address=None, ip_port=31335):
+                 ip_address=None, ip_port=31335, baudrate=115200):
 
         """
 
@@ -68,6 +68,10 @@ class Frimetix(threading.Thread):
         :param ip_address: ip address of tcp/ip connected device.
 
         :param ip_port: ip port of tcp/ip connected device
+
+        :param baudrate: baudrate for the serial connection
+                                    Make sure it matches the value in 
+                                    the ino sketch
         """
 
         # initialize threading parent
@@ -108,6 +112,7 @@ class Frimetix(threading.Thread):
 
         # save input parameters as instance variables
         self.com_port = com_port
+        self.baudrate = baudrate
         self.arduino_instance_id = arduino_instance_id
         self.arduino_wait = arduino_wait
         self.sleep_tune = sleep_tune
@@ -366,7 +371,7 @@ class Frimetix(threading.Thread):
             if port.pid is None:
                 continue
             try:
-                self.serial_port = serial.Serial(port.device, 115200,
+                self.serial_port = serial.Serial(port.device, self.baudrate,
                                                  timeout=1, writeTimeout=0)
             except SerialException:
                 continue
@@ -408,7 +413,7 @@ class Frimetix(threading.Thread):
         # if port is not found, a serial exception will be thrown
         try:
             print(f'Opening {self.com_port}...')
-            self.serial_port = serial.Serial(self.com_port, 115200,
+            self.serial_port = serial.Serial(self.com_port, self.baudrate,
                                              timeout=1, writeTimeout=0)
 
             print(
@@ -2457,7 +2462,7 @@ class Frimetix(threading.Thread):
                     raise RuntimeError('No serial port or ip address set.')
                 
                 if not action[1]: #sleep only if not continuous 
-                    time.sleep(0.1)
+                    time.sleep(0.01)
             else:
                 pass
 
