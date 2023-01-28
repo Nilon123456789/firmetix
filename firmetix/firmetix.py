@@ -45,7 +45,8 @@ class Firmetix(threading.Thread):
     def __init__(self, com_port=None, arduino_instance_id=1,
                  arduino_wait=4, sleep_tune=0.000001,
                  shutdown_on_exception=True,
-                 ip_address=None, ip_port=31335, baudrate=115200):
+                 ip_address=None, ip_port=31335, baudrate=115200, 
+                 send_delay=0.01):
 
         """
 
@@ -72,6 +73,9 @@ class Firmetix(threading.Thread):
         :param baudrate: baudrate for the serial connection
                                     Make sure it matches the value in 
                                     the ino sketch
+        
+        :param send_delay: delay between sending commands to the arduino
+                                    for serial connections only
         """
 
         # initialize threading parent
@@ -90,6 +94,8 @@ class Firmetix(threading.Thread):
 
         self.ip_address = ip_address
         self.ip_port = ip_port
+
+        self.send_delay = send_delay
 
         if not self.ip_address:
             self.the_data_receive_thread = threading.Thread(target=self._serial_receiver)
@@ -2472,7 +2478,7 @@ class Firmetix(threading.Thread):
                     raise RuntimeError('No serial port or ip address set.')
                 
                 if not action[1]: #sleep only if not continuous 
-                    time.sleep(0.01)
+                    time.sleep(self.send_delay)
             else:
                 pass
 
