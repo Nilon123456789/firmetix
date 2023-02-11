@@ -105,7 +105,7 @@ class PrivateConstants:
     DEBUG_PRINT = 99
     MAX_PIN_REPORT = GET_MAX_PINS
 
-    FIRMETIX_VERSION = "6.0.1"
+    FIRMETIX_VERSION = "6.0.2"
     FIRMETIX4ARDUINO_MAJOR_VERSION = 6
 
     # reporting control
