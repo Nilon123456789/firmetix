@@ -20,7 +20,7 @@ class wheels():
     def __init__(self):
         # some globals
         # Create a Frimetix instance.
-        self.board = firmetix.Frimetix()
+        self.board = firmetix.Firmetix()
         # attach servo pin
         self.board.set_pin_mode_servo(SERVO_PIN, 900, 2000)
         # set speed of DC motors

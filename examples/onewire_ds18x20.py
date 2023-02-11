@@ -58,7 +58,7 @@ class OneWireTemp:
 
         # instantiate the library
         try:
-            self.board = firmetix.Frimetix()
+            self.board = firmetix.Firmetix()
         except (KeyboardInterrupt, serial.serialutil.SerialException):
             print('User abort')
             sys.exit(0)

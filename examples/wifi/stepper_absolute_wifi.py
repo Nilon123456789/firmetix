@@ -27,7 +27,7 @@ when motion is complete.
 """
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(ip_address='192.168.2.112')
 time.sleep(.2)
 
 

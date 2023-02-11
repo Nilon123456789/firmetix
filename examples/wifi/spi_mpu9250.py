@@ -38,7 +38,7 @@ import time
 from firmetix import firmetix
 
 # Instantiate the Frimetix class accepting all default parameters.
-board = firmetix.Frimetix(ip_address='192.168.2.220')
+board = firmetix.Firmetix(ip_address='192.168.2.220')
 
 
 # Convenience values for the pins.

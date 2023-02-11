@@ -84,7 +84,7 @@ def digital_in_pullup(my_board, pin):
         sys.exit(0)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 try:
     digital_in_pullup(board, DIGITAL_PIN)

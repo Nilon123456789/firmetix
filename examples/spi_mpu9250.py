@@ -30,7 +30,7 @@ import time
 from firmetix import firmetix
 
 # Instantiate the Frimetix class accepting all default parameters.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 
 # Convenience values for the pins.

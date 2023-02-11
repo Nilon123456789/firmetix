@@ -32,9 +32,9 @@ from firmetix.private_constants import PrivateConstants
 
 
 # noinspection PyPep8,PyMethodMayBeStatic,GrazieInspection,PyBroadException,PyCallingNonCallable
-class Frimetix(threading.Thread):
+class Firmetix(threading.Thread):
     """
-    This class exposes and implements the frimetix API.
+    This class exposes and implements the firmetix API.
     It uses threading to accommodate concurrency.
     It includes the public API methods as well as
     a set of private methods.
@@ -45,7 +45,8 @@ class Frimetix(threading.Thread):
     def __init__(self, com_port=None, arduino_instance_id=1,
                  arduino_wait=4, sleep_tune=0.000001,
                  shutdown_on_exception=True,
-                 ip_address=None, ip_port=31335):
+                 ip_address=None, ip_port=31335, baudrate=115200, 
+                 send_delay=0.01):
 
         """
 
@@ -68,6 +69,13 @@ class Frimetix(threading.Thread):
         :param ip_address: ip address of tcp/ip connected device.
 
         :param ip_port: ip port of tcp/ip connected device
+
+        :param baudrate: baudrate for the serial connection
+                                    Make sure it matches the value in 
+                                    the ino sketch
+        
+        :param send_delay: delay between sending commands to the arduino
+                                    for serial connections only
         """
 
         # initialize threading parent
@@ -86,6 +94,8 @@ class Frimetix(threading.Thread):
 
         self.ip_address = ip_address
         self.ip_port = ip_port
+
+        self.send_delay = send_delay
 
         if not self.ip_address:
             self.the_data_receive_thread = threading.Thread(target=self._serial_receiver)
@@ -108,6 +118,7 @@ class Frimetix(threading.Thread):
 
         # save input parameters as instance variables
         self.com_port = com_port
+        self.baudrate = baudrate
         self.arduino_instance_id = arduino_instance_id
         self.arduino_wait = arduino_wait
         self.sleep_tune = sleep_tune
@@ -278,7 +289,7 @@ class Frimetix(threading.Thread):
         self.the_data_receive_thread.start()
         self.the_sender_thread.start()
 
-        print(f"Frimetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
+        print(f"Firmetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
               f"Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n")
 
         # using the serial link
@@ -320,18 +331,18 @@ class Frimetix(threading.Thread):
         print(f'Waiting for Arduino to reset')
         print(f'Reset Complete')
 
-        # get frimetix firmware version and print it
-        print('\nRetrieving Frimetix4Arduino firmware ID...')
+        # get firmetix firmware version and print it
+        print('\nRetrieving Firmetix4Arduino firmware ID...')
         self._get_firmware_version()
         if not self.firmware_version:
             if self.shutdown_on_exception:
                 self.shutdown()
-            raise RuntimeError(f'Frimetix4Arduino firmware version')
+            raise RuntimeError(f'Firmetix4Arduino firmware version not found')
 
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
                 raise RuntimeError('Please upgrade the server firmware to version '+ str(PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
-            print(f'FrimetixArduino firmware version: {self.firmware_version[0]}.'
+            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._add_command(command, False)
@@ -342,9 +353,10 @@ class Frimetix(threading.Thread):
         time.sleep(.2)
 
         # get the maximum number of pins
-        command = [PrivateConstants.GET_MAX_PINS]
-        self._add_command(command, False)
+        self._get_max_pins()
         time.sleep(.2)
+
+        print("\nFirmetix4Arduino is ready to use\n")
 
         # Have the server reset its data structures
         command = [PrivateConstants.RESET]
@@ -356,7 +368,7 @@ class Frimetix(threading.Thread):
         containing a sketch that has a matching arduino_instance_id as
         specified in the input parameters of this class.
 
-        This is used explicitly with the Frimetix4Arduino sketch.
+        This is used explicitly with the Firmetix4Arduino sketch.
         """
 
         # a list of serial ports to be checked
@@ -368,7 +380,7 @@ class Frimetix(threading.Thread):
             if port.pid is None:
                 continue
             try:
-                self.serial_port = serial.Serial(port.device, 115200,
+                self.serial_port = serial.Serial(port.device, self.baudrate,
                                                  timeout=1, writeTimeout=0)
             except SerialException:
                 continue
@@ -381,7 +393,7 @@ class Frimetix(threading.Thread):
             # clear out any possible data in the input buffer
         # wait for arduino to reset
         print(
-            f'\nWaiting {self.arduino_wait} seconds(arduino_wait) for Arduino devices to '
+            f'\nWaiting {self.arduino_wait} seconds for Arduino devices to '
             'reset...')
         # temporary for testing
         time.sleep(self.arduino_wait)
@@ -394,7 +406,7 @@ class Frimetix(threading.Thread):
             if self.reported_arduino_id != self.arduino_instance_id:
                 continue
             else:
-                print('Valid Arduino ID Found.')
+                print(f'Valid Arduino ID Found. | ID = {self.reported_arduino_id}')
                 self.serial_port.reset_input_buffer()
                 self.serial_port.reset_output_buffer()
                 return
@@ -410,7 +422,7 @@ class Frimetix(threading.Thread):
         # if port is not found, a serial exception will be thrown
         try:
             print(f'Opening {self.com_port}...')
-            self.serial_port = serial.Serial(self.com_port, 115200,
+            self.serial_port = serial.Serial(self.com_port, self.baudrate,
                                              timeout=1, writeTimeout=0)
 
             print(
@@ -425,19 +437,19 @@ class Frimetix(threading.Thread):
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(f'Incorrect Arduino ID: {self.reported_arduino_id}')
-            print('Valid Arduino ID Found.')
+            print(f'Valid Arduino ID Found. | ID = {self.reported_arduino_id}')
             # get arduino firmware version and print it
-            print('\nRetrieving Frimetix4Arduino firmware ID...')
+            print('\nRetrieving Firmetix4Arduino firmware ID...')
             self._get_firmware_version()
 
             if not self.firmware_version:
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError(
-                    f'Frimetix4Arduino Sketch Firmware Version Not Found')
+                    f'Firmetix4Arduino Sketch Firmware Version Not Found')
 
             else:
-                print(f'Frimetix4Arduino firmware version: {self.firmware_version[0]}.'
+                print(f'Firmetix4Arduino firmware version: {self.firmware_version[0]}.'
                       f'{self.firmware_version[1]}')
         except KeyboardInterrupt:
             if self.shutdown_on_exception:
@@ -551,7 +563,7 @@ class Frimetix(threading.Thread):
 
     def _get_arduino_id(self):
         """
-        Retrieve arduino-frimetix arduino id
+        Retrieve arduino-firmetix arduino id
 
         """
         command = [PrivateConstants.ARE_U_THERE]
@@ -562,7 +574,7 @@ class Frimetix(threading.Thread):
     def _get_firmware_version(self):
         """
         This method retrieves the
-        arduino-frimetix firmware version
+        arduino-firmetix firmware version
 
         """
         command = [PrivateConstants.GET_FIRMWARE_VERSION]
@@ -573,13 +585,13 @@ class Frimetix(threading.Thread):
     def _get_max_pins(self):
         """
         This method retrieves the
-        arduino-frimetix max pins
+        arduino-firmetix max pins
 
         """
         command = [PrivateConstants.GET_MAX_PINS]
         self._add_command(command, False)
         # provide time for the reply
-        time.sleep(.5)
+        time.sleep(.2)
 
     def i2c_read(self, address, register, number_of_bytes,
                  callback=None, i2c_port=0,
@@ -795,7 +807,7 @@ class Frimetix(threading.Thread):
         """
         self._set_pin_mode(pin_number, PrivateConstants.AT_OUTPUT)
 
-    def set_pin_mode_analog_input(self, pin_number, differential=0, callback=None):
+    def set_pin_mode_analog_input(self, pin_number, callback, differential=0):
         """
         Set a pin as an analog input.
 
@@ -817,7 +829,7 @@ class Frimetix(threading.Thread):
         self._set_pin_mode(pin_number, PrivateConstants.AT_ANALOG, differential,
                            callback)
 
-    def set_pin_mode_digital_input(self, pin_number, callback=None):
+    def set_pin_mode_digital_input(self, pin_number, callback):
         """
         Set a pin as a digital input.
 
@@ -835,7 +847,7 @@ class Frimetix(threading.Thread):
         """
         self._set_pin_mode(pin_number, PrivateConstants.AT_INPUT, callback=callback)
 
-    def set_pin_mode_digital_input_pullup(self, pin_number, callback=None):
+    def set_pin_mode_digital_input_pullup(self, pin_number, callback):
         """
         Set a pin as a digital input with pullup enabled.
 
@@ -893,7 +905,7 @@ class Frimetix(threading.Thread):
         command = [PrivateConstants.I2C_BEGIN, i2c_port]
         self._add_command(command, False)
 
-    def set_pin_mode_dht(self, pin_number, callback=None, dht_type=22):
+    def set_pin_mode_dht(self, pin_number, callback, dht_type=22):
         """
 
         :param pin_number: connection pin
@@ -968,7 +980,7 @@ class Frimetix(threading.Thread):
             raise RuntimeError(f'The SERVO feature is disabled in the server.')
 
     def set_pin_mode_sonar(self, trigger_pin, echo_pin,
-                           callback=None):
+                           callback):
         """
 
         :param trigger_pin:
@@ -1802,7 +1814,7 @@ class Frimetix(threading.Thread):
                          called when pin data value changes
 
         """
-        if PrivateConstants.AT_ANALOG:
+        if pin_state == PrivateConstants.AT_ANALOG:
             if not self.is_valid_pin(pin_number, True):
                 raise ValueError(f'Invalid Pin: {pin_number}')
         else:
@@ -2213,11 +2225,10 @@ class Frimetix(threading.Thread):
         :param pin: pin number to check
         :return: True if valid, False if not
         """
-        if analog:
-            if pin >= self.__max_number_of_analog_pins:
-                return False
+        if analog and pin >= self.__max_number_of_analog_pins:
+            return False
         elif pin >= self.__max_number_of_digital_pins:
-                return False
+            return False
         return True
 
     '''
@@ -2311,7 +2322,7 @@ class Frimetix(threading.Thread):
 
     def _firmware_message(self, data):
         """
-        Frimetix4Arduino firmware version message
+        Firmetix4Arduino firmware version message
 
         :param data: data[0] = major number, data[1] = minor number.
 
@@ -2326,9 +2337,17 @@ class Frimetix(threading.Thread):
 
         :param data: data[0] = max digital pin, data[1] = max analog pin.
         """
+        print(f'Found {data[0]} digital pins and {data[1]} analog pins')
+
+        if data[0] == 0 or data[1] == 0:
+            if self.shutdown_on_exception:
+                self.shutdown()
+            raise ValueError('Got empty max pin message.')
+        
         self.__max_number_of_digital_pins = data[0]
         self.__max_number_of_analog_pins = data[1]
         self.__first_analog_pin = self.__max_number_of_digital_pins - self.__max_number_of_analog_pins
+        
 
     def _i2c_read_report(self, data):
         """
@@ -2420,6 +2439,7 @@ class Frimetix(threading.Thread):
         """
         This is a private utility method.
 
+        It adds a command to the command queue.
 
         :param command:  command data in the form of a list
 
@@ -2437,7 +2457,7 @@ class Frimetix(threading.Thread):
         """
         This is a private utility method.
         
-        This method will send the next command in the queue.
+        This method will send the next command in the queue to the server.
         """
         self.run_event.wait()
 
@@ -2458,7 +2478,7 @@ class Frimetix(threading.Thread):
                     raise RuntimeError('No serial port or ip address set.')
                 
                 if not action[1]: #sleep only if not continuous 
-                    time.sleep(0.1)
+                    time.sleep(self.send_delay)
             else:
                 pass
 

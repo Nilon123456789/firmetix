@@ -64,7 +64,7 @@ def adxl345(my_board):
             sys.exit(0)
 
 
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 try:
     adxl345(board)
 except KeyboardInterrupt:

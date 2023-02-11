@@ -64,7 +64,7 @@ def adxl345(my_board):
             sys.exit(0)
 
 
-board = firmetix.Frimetix(ip_address='192.168.2.220')
+board = firmetix.Firmetix(ip_address='192.168.2.220')
 try:
     adxl345(board)
 except KeyboardInterrupt:

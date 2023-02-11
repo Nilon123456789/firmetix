@@ -137,3 +137,9 @@ dmypy.json
 !/html/
 
 *.code-workspace
+
+.DS_Store
+
+.vscode/
+
+test.py

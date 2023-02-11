@@ -29,7 +29,7 @@ and toggle the pin 5 times.
 """
 
 # Create a Frimetix instance.
-board = firmetix.Frimetix()
+board = firmetix.Firmetix()
 
 # Analog pins number are actually following the digital pins
 # So if you add the number of digital pins plus the number of the analog pin you get the actual pin number of the analog pin
