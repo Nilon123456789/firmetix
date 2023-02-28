@@ -45,7 +45,7 @@ class Firmetix(threading.Thread):
     def __init__(self, com_port=None, arduino_instance_id=1,
                  arduino_wait=4, sleep_tune=0.000001,
                  shutdown_on_exception=True,
-                 ip_address=None, ip_port=31335, baudrate=115200, 
+                 ip_address=None, ip_port=31335, baudrate=115200,
                  send_delay=0.01):
 
         """
@@ -341,7 +341,8 @@ class Firmetix(threading.Thread):
 
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
-                raise RuntimeError('Please upgrade the server firmware to version '+ str(PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
+                raise RuntimeError('Please upgrade the server firmware to version ' + str(
+                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
             print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
@@ -462,14 +463,14 @@ class Firmetix(threading.Thread):
         Returns the maximum number of digital pins on the Arduino board (digital pins + analog pins)
         """
         return self.__max_number_of_digital_pins
-    
+
     @property
     def max_number_of_analog_pins(self):
         """
         Returns the maximum number of analog pins on the Arduino board
         """
         return self.__max_number_of_analog_pins
-    
+
     @property
     def first_analog_pin(self):
         """
@@ -581,7 +582,7 @@ class Firmetix(threading.Thread):
         self._add_command(command, False)
         # provide time for the reply
         time.sleep(.5)
-    
+
     def _get_max_pins(self):
         """
         This method retrieves the
@@ -1130,7 +1131,7 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError(f'The Stepper feature is disabled in the server.')
-    
+
     def set_pin_mode_tone(self, pin_number):
         """
         Same as set_pin_mode_digital_output
@@ -1138,7 +1139,7 @@ class Firmetix(threading.Thread):
         :param pin_number:
         """
         self.set_pin_mode_digital_output(pin_number)
-    
+
     def tone(self, pin_number, frequency, duration=0):
         """
         Play a tone of a given frequency for a given duration.
@@ -1149,21 +1150,20 @@ class Firmetix(threading.Thread):
         """
         if not self.is_valid_pin(pin_number, False):
             raise ValueError(f'Invalid Pin: {pin_number}')
-            
+
         freq_msb = frequency >> 8
         freq_lsb = frequency & 0xff
 
-
         dur_msb = 0
         dur_lsb = 0
-        
+
         if (duration > 0):
             dur_msb = duration >> 8
             dur_lsb = duration & 0xff
 
         command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
         self._add_command(command, False)
-    
+
     def no_tone(self, pin_number):
         """
         Stop playing the tone.
@@ -1562,7 +1562,7 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError('stepper_set_current_position: Invalid motor_id.')
-        position_bytes = list(position.to_bytes(4, 'big',  signed=True))
+        position_bytes = list(position.to_bytes(4, 'big', signed=True))
 
         command = [PrivateConstants.STEPPER_SET_CURRENT_POSITION, motor_id]
         for value in position_bytes:
@@ -2222,8 +2222,12 @@ class Firmetix(threading.Thread):
     def is_valid_pin(self, pin, analog=False):
         """
         Check if a pin is valid for the current board
+
         :param pin: pin number to check
+        :param analog: True if analog pin, False if digital pin
+
         :return: True if valid, False if not
+
         """
         if analog and pin >= self.__max_number_of_analog_pins:
             return False
@@ -2330,7 +2334,7 @@ class Firmetix(threading.Thread):
         """
 
         self.firmware_version = [data[0], data[1], data[2]]
-    
+
     def _max_pin_message(self, data):
         """
         Max pin message
@@ -2343,11 +2347,10 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise ValueError('Got empty max pin message.')
-        
+
         self.__max_number_of_digital_pins = data[0]
         self.__max_number_of_analog_pins = data[1]
         self.__first_analog_pin = self.__max_number_of_digital_pins - self.__max_number_of_analog_pins
-        
 
     def _i2c_read_report(self, data):
         """
@@ -2435,7 +2438,7 @@ class Firmetix(threading.Thread):
         if self.loop_back_callback:
             self.loop_back_callback(data)
 
-    def _add_command(self, command, continuous : bool = False):
+    def _add_command(self, command, continuous: bool = False):
         """
         This is a private utility method.
 
@@ -2452,7 +2455,7 @@ class Firmetix(threading.Thread):
 
         # Add command to the queue
         self.__command_queue.append([send_message, continuous])
-    
+
     def _send_command(self):
         """
         This is a private utility method.
@@ -2461,7 +2464,7 @@ class Firmetix(threading.Thread):
         """
         self.run_event.wait()
 
-        while self._is_running() and not self.shutdown_flag: 
+        while self._is_running() and not self.shutdown_flag:
             if len(self.__command_queue) > 0:
                 action = self.__command_queue.pop(0)
                 command = action[0]
@@ -2476,8 +2479,8 @@ class Firmetix(threading.Thread):
                     self.sock.sendall(command)
                 else:
                     raise RuntimeError('No serial port or ip address set.')
-                
-                if not action[1]: #sleep only if not continuous 
+
+                if not action[1]:  # sleep only if not continuous
                     time.sleep(self.send_delay)
             else:
                 pass
