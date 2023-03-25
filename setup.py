@@ -9,9 +9,9 @@ with open('README.md') as f:
 setup(
     name='firmetix',
     packages=['firmetix'],
-    install_requires=['pyserial'],
+    install_requires=['pyserial', 'simplepyble'],
 
-    version='6.02',
+    version='6.1.0',
     description="Remotely Control And Monitor Arduino-Core devices",
     long_description=long_description,
     long_description_content_type='text/markdown',

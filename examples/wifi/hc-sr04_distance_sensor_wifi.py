@@ -65,7 +65,7 @@ def sonar(my_board, trigger_pin, echo_pin, callback):
             sys.exit(0)
 
 
-board = firmetix.Firmetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(connection_type=1, ip_address='192.168.2.112')
 time.sleep(.02)
 try:
     sonar(board, TRIGGER_PIN, ECHO_PIN, the_callback)

@@ -79,7 +79,7 @@ def analog_in(my_board, pin):
         sys.exit(0)
 
 
-board = firmetix.Firmetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(connection_type=1, ip_address='192.168.2.112')
 
 try:
     analog_in(board, ANALOG_PIN)

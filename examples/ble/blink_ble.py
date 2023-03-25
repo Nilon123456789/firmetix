@@ -1,5 +1,5 @@
 """
- Copyright (c) 2020 Alan Yorinks All rights reserved.
+ Copyright (c) 2023 Nils Lahaye All rights reserved.
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -31,7 +31,7 @@ and toggle the pin 5 times.
 DIGITAL_PIN = 5  # the board LED
 
 # Create a Frimetix instance.
-board = firmetix.Firmetix(connection_type=1, ip_address='192.168.2.112')
+board = firmetix.Firmetix(connection_type=2)
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_digital_output(DIGITAL_PIN)

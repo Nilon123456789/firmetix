@@ -15,6 +15,10 @@
  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 """
 
+class Connection_type:
+    SERIAL = 0
+    TCP_IP = 1
+    BLE = 2
 
 class PrivateConstants:
     """
@@ -102,10 +106,11 @@ class PrivateConstants:
     STEPPER_RUNNING_REPORT = 18
     STEPPER_RUN_COMPLETE_REPORT = 19
     FEATURES = 20
+    NOT_IMPLEMENTED = 21
     DEBUG_PRINT = 99
     MAX_PIN_REPORT = GET_MAX_PINS
 
-    FIRMETIX_VERSION = "6.0.2"
+    FIRMETIX_VERSION = "6.1.0"
     FIRMETIX4ARDUINO_MAJOR_VERSION = 6
 
     # reporting control
@@ -123,6 +128,7 @@ class PrivateConstants:
     AT_SERVO = 4
     AT_SONAR = 5
     AT_DHT = 6
+    AT_ANALOG_OUTPUT = 7
     AT_MODE_NOT_SET = 255
 
     # maximum number of sonars allowed
@@ -142,3 +148,8 @@ class PrivateConstants:
     SPI_FEATURE = 0x08
     SERVO_FEATURE = 0x10
     SONAR_FEATURE = 0x20
+
+    # BLE UID
+    SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e" # UART service UUID
+    CHARACTERISTIC_UUID_TX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e" # RX characteristic UUID
+    CHARACTERISTIC_UUID_RX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e" # TX characteristic UUID

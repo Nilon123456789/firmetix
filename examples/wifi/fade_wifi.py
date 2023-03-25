@@ -30,7 +30,7 @@ Setup a pin for output and fade its intensity
 DIGITAL_PIN = 5
 
 # Create a Frimetix instance.
-board = firmetix.Firmetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(connection_type=1, ip_address='192.168.2.112')
 
 # Set the DIGITAL_PIN as an output pin
 board.set_pin_mode_analog_output(DIGITAL_PIN)
