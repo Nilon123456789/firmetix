@@ -9,14 +9,14 @@ with open('README.md') as f:
 setup(
     name='firmetix',
     packages=['firmetix'],
-    install_requires=['pyserial'],
+    install_requires=['pyserial', 'simplepyble'],
 
-    version='6.02',
+    version='7.0.0',
     description="Remotely Control And Monitor Arduino-Core devices",
     long_description=long_description,
     long_description_content_type='text/markdown',
 
-    author='Alan Yorinks and Nils Lahaye',
+    author='Nils Lahaye',
     author_email='nils.lahaye@icloud.com',
     url='https://github.com/Nilon123456789/firmetix',
     download_url='https://github.com/Nilon123456789/firmetix',

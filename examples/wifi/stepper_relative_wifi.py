@@ -26,7 +26,7 @@ Run a motor to a relative position.
 """
 
 # Create a Frimetix instance.
-board = firmetix.Firmetix(ip_address='192.168.2.112')
+board = firmetix.Firmetix(connection_type=1, ip_address='192.168.2.112')
 time.sleep(.2)
 
 

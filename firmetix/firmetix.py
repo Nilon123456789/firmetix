@@ -1,5 +1,5 @@
 """
- Copyright (c) 2022 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks
+ Copyright (c) 2023 Nils Lahaye All rights reserved. Based on the work of Alan Yorinks
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
@@ -19,6 +19,7 @@ import socket
 import sys
 import threading
 import time
+import simplepyble
 from collections import deque
 
 import serial
@@ -28,7 +29,7 @@ from serial.serialutil import SerialException
 from serial.tools import list_ports
 
 # noinspection PyUnresolvedReferences
-from firmetix.private_constants import PrivateConstants
+from firmetix.private_constants import PrivateConstants, Connection_type
 
 
 # noinspection PyPep8,PyMethodMayBeStatic,GrazieInspection,PyBroadException,PyCallingNonCallable
@@ -42,11 +43,11 @@ class Firmetix(threading.Thread):
     """
 
     # noinspection PyPep8,PyPep8,PyPep8
-    def __init__(self, com_port=None, arduino_instance_id=1,
+    def __init__(self, com_port=None, arduino_instance_id=1, connection_type=0,
                  arduino_wait=4, sleep_tune=0.000001,
                  shutdown_on_exception=True,
-                 ip_address=None, ip_port=31335, baudrate=115200, 
-                 send_delay=0.01):
+                 ip_address=None, ip_port=31335, baudrate=115200,
+                 send_delay=0.01, ble_mac_address=None, ble_name=None):
 
         """
 
@@ -56,6 +57,8 @@ class Firmetix(threading.Thread):
 
         :param arduino_instance_id: Match with the value installed on the
                                     arduino-telemetrix sketch.
+        
+        :param connection_type: 0 = serial, 1 = tcp/ip, 2 = ble (default = 0)
 
         :param arduino_wait: Amount of time to wait for an Arduino to
                              fully reset itself.
@@ -76,6 +79,11 @@ class Firmetix(threading.Thread):
         
         :param send_delay: delay between sending commands to the arduino
                                     for serial connections only
+
+        :param ble_mac_address: mac address of the ble device
+
+        :param ble_name: name of the ble device
+
         """
 
         # initialize threading parent
@@ -92,16 +100,40 @@ class Firmetix(threading.Thread):
         self.the_sender_thread = threading.Thread(target=self._send_command)
         self.the_sender_thread.daemon = True
 
+        self.connection_type = connection_type
+
         self.ip_address = ip_address
         self.ip_port = ip_port
 
+        self.ble_mac_address = ble_mac_address
+        self.ble_name = ble_name
+        if self.ble_name is None: # if no name is given, use the default
+            self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
+
+        self.adapter = None
+        self.ble_device = None
+
         self.send_delay = send_delay
 
-        if not self.ip_address:
-            self.the_data_receive_thread = threading.Thread(target=self._serial_receiver)
-        else:
-            self.the_data_receive_thread = threading.Thread(target=self._tcp_receiver)
+        # Change connection type if ip address is given or ble mac address is given
+        if self.connection_type == Connection_type.SERIAL:
+            if self.ip_address is not None:
+                self.connection_type = Connection_type.TCP_IP
+                print("WARNING: ip address given, but connection type is serial. Changing connection type to TCP/IP")
+            elif self.ble_mac_address is not None:
+                self.connection_type = Connection_type.BLE
+                print("WARNING: ble mac address given, but connection type is serial. Changing connection type to BLE")
+            elif self.ble_name is not None:
+                self.connection_type = Connection_type.BLE
+                print("WARNING: ble name given, but connection type is serial. Changing connection type to BLE")
 
+        if self.connection_type == Connection_type.SERIAL:
+            self.the_data_receive_thread = threading.Thread(target=self._serial_receiver)
+        elif self.connection_type == Connection_type.TCP_IP:
+            self.the_data_receive_thread = threading.Thread(target=self._tcp_receiver)
+        else :
+            self.the_data_receive_thread = threading.Thread(target=lambda: None)
+        
         self.the_data_receive_thread.daemon = True
 
         # flag to allow the reporter and receive threads to run.
@@ -185,6 +217,9 @@ class Firmetix(threading.Thread):
         self.report_dispatch.update(
             {PrivateConstants.FEATURES:
                  self._features_report})
+        self.report_dispatch.update(
+            {PrivateConstants.NOT_IMPLEMENTED:
+                 self._not_implemented_report})
         self.report_dispatch.update(
             {PrivateConstants.MAX_PIN_REPORT: self._max_pin_message})
 
@@ -290,10 +325,9 @@ class Firmetix(threading.Thread):
         self.the_sender_thread.start()
 
         print(f"Firmetix:  Version {PrivateConstants.FIRMETIX_VERSION}\n\n"
-              f"Copyright (c) 2022 Nils Lahaye All Rights Reserved.\n")
+              f"Copyright (c) 2023 Nils Lahaye All Rights Reserved.\n")
 
-        # using the serial link
-        if not self.ip_address:
+        if self.connection_type == Connection_type.SERIAL:
             if not self.com_port:
                 # user did not specify a com_port
                 try:
@@ -321,10 +355,54 @@ class Firmetix(threading.Thread):
                 if self.shutdown_on_exception:
                     self.shutdown()
                 raise RuntimeError('No Arduino Found or User Aborted Program')
-        else:
+        elif self.connection_type == Connection_type.TCP_IP:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.ip_address, self.ip_port))
+
             print(f'Successfully connected to: {self.ip_address}:{self.ip_port}')
+        elif self.connection_type == Connection_type.BLE:
+
+            adapters = simplepyble.Adapter.get_adapters()
+
+            if len(adapters) == 0:
+                raise RuntimeError('No Bluetooth adapters found')
+            
+            print(f'Found {len(adapters)} Bluetooth adapters')
+            self.adapter = adapters[0] # use the first adapter
+            print(f'\tUsing adapter 0: {self.adapter.identifier()}')
+
+            # if the user did not specify a mac address
+            if self.ble_mac_address == None:
+                self._find_arduino_ble()
+            else:
+                self._manual_open_ble()
+            
+            if self.ble_device == None:
+                raise RuntimeError('No Arduino Found or User Aborted Program')
+            
+            # check if service UUID match and characteristic UUID match
+            services = self.ble_device.services()
+
+            found_rx_uuid = False
+            found_tx_uuid = False
+
+            for service in services:
+                if PrivateConstants.SERVICE_UUID != service.uuid():
+                    continue
+                for characteristic in service.characteristics():
+                    if PrivateConstants.CHARACTERISTIC_UUID_RX == characteristic.uuid():
+                        found_rx_uuid = True
+                    elif PrivateConstants.CHARACTERISTIC_UUID_TX == characteristic.uuid():
+                        found_tx_uuid = True
+            
+            if not found_rx_uuid or not found_tx_uuid:
+                raise RuntimeError('Firmetix4Arduino BLE services not found')
+            
+            # subscribe to the RX characteristic to receive data from the Arduino
+            self.ble_device.notify(PrivateConstants.SERVICE_UUID, PrivateConstants.CHARACTERISTIC_UUID_RX, self._ble_receiver)
+            
+        else:
+            raise RuntimeError('Invalid connection type specified')
 
         # allow the threads to run
         self._run_threads()
@@ -341,7 +419,8 @@ class Firmetix(threading.Thread):
 
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
-                raise RuntimeError('Please upgrade the server firmware to version '+ str(PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
+                raise RuntimeError('Please upgrade the server firmware to version ' + str(
+                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
             print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
                   f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
@@ -381,7 +460,7 @@ class Firmetix(threading.Thread):
                 continue
             try:
                 self.serial_port = serial.Serial(port.device, self.baudrate,
-                                                 timeout=1, writeTimeout=0)
+                                                 timeout=1, write_timeout=0)
             except SerialException:
                 continue
             # create a list of serial ports that we opened
@@ -423,7 +502,7 @@ class Firmetix(threading.Thread):
         try:
             print(f'Opening {self.com_port}...')
             self.serial_port = serial.Serial(self.com_port, self.baudrate,
-                                             timeout=1, writeTimeout=0)
+                                             timeout=1, write_timeout=0)
 
             print(
                 f'\nWaiting {self.arduino_wait} seconds(arduino_wait) for Arduino devices to '
@@ -456,20 +535,69 @@ class Firmetix(threading.Thread):
                 self.shutdown()
             raise RuntimeError('User Hit Control-C')
 
+    def _find_arduino_ble(self):
+        """
+        This method will search all potential BLE devices for an Arduino
+        """
+        if self.adapter is None:
+            raise RuntimeError('BLE adapter not initialized')
+        print('Looking for a compatible ble device...')
+
+        # scan for devices for 5 seconds
+        self.adapter.scan_for(5000)
+
+        peripherals = self.adapter.scan_get_results()
+        for peripheral in peripherals:
+            if peripheral.identifier() == self.ble_name:
+                self.ble_device = peripheral
+                break
+        
+        if self.ble_device is None:
+            raise RuntimeError(f'No BLE devices found with name {self.ble_name}')
+        
+        # connect to the peripheral
+        self.ble_device.connect()
+        print(f'Connected to {self.ble_name} with address {self.ble_device.address()}')
+            
+    
+    def _manual_open_ble(self):
+        """
+        Open a BLE connection to the device with the specified MAC address
+        """
+        if self.adapter is None:
+            raise RuntimeError('BLE adapter not initialized')
+        print(f'Looking for device {self.ble_mac_address} ...')
+
+        # scan for devices for 5 seconds
+        self.adapter.scan_for(5000)
+
+        peripherals = self.adapter.scan_get_results()
+        for peripheral in peripherals:
+            if peripheral.address() == self.ble_mac_address:
+                self.ble_device = peripheral
+                break
+        
+        if self.ble_device is None:
+            raise RuntimeError(f'{self.ble_name} not found')
+        
+        # connect to the peripheral
+        self.ble_device.connect()
+        print(f'Connected to {self.ble_name} with address {self.ble_device.address()}')
+
     @property
     def max_number_of_digital_pins(self):
         """
         Returns the maximum number of digital pins on the Arduino board (digital pins + analog pins)
         """
         return self.__max_number_of_digital_pins
-    
+
     @property
     def max_number_of_analog_pins(self):
         """
         Returns the maximum number of analog pins on the Arduino board
         """
         return self.__max_number_of_analog_pins
-    
+
     @property
     def first_analog_pin(self):
         """
@@ -581,7 +709,7 @@ class Firmetix(threading.Thread):
         self._add_command(command, False)
         # provide time for the reply
         time.sleep(.5)
-    
+
     def _get_max_pins(self):
         """
         This method retrieves the
@@ -1130,7 +1258,7 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError(f'The Stepper feature is disabled in the server.')
-    
+
     def set_pin_mode_tone(self, pin_number):
         """
         Same as set_pin_mode_digital_output
@@ -1138,7 +1266,7 @@ class Firmetix(threading.Thread):
         :param pin_number:
         """
         self.set_pin_mode_digital_output(pin_number)
-    
+
     def tone(self, pin_number, frequency, duration=0):
         """
         Play a tone of a given frequency for a given duration.
@@ -1149,21 +1277,20 @@ class Firmetix(threading.Thread):
         """
         if not self.is_valid_pin(pin_number, False):
             raise ValueError(f'Invalid Pin: {pin_number}')
-            
+
         freq_msb = frequency >> 8
         freq_lsb = frequency & 0xff
 
-
         dur_msb = 0
         dur_lsb = 0
-        
+
         if (duration > 0):
             dur_msb = duration >> 8
             dur_lsb = duration & 0xff
 
         command = [PrivateConstants.TONE, pin_number, freq_msb, freq_lsb, dur_msb, dur_lsb]
         self._add_command(command, False)
-    
+
     def no_tone(self, pin_number):
         """
         Stop playing the tone.
@@ -1562,7 +1689,7 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise RuntimeError('stepper_set_current_position: Invalid motor_id.')
-        position_bytes = list(position.to_bytes(4, 'big',  signed=True))
+        position_bytes = list(position.to_bytes(4, 'big', signed=True))
 
         command = [PrivateConstants.STEPPER_SET_CURRENT_POSITION, motor_id]
         for value in position_bytes:
@@ -1870,13 +1997,9 @@ class Firmetix(threading.Thread):
             self._add_command(command, False)
             time.sleep(.5)
 
-            if self.ip_address:
-                try:
-                    self.sock.shutdown(socket.SHUT_RDWR)
-                    self.sock.close()
-                except Exception:
-                    pass
-            else:
+            if self.connection_type == Connection_type.SERIAL:
+                if not self.serial_port:
+                    raise Exception('')
                 try:
                     self.serial_port.reset_input_buffer()
                     self.serial_port.reset_output_buffer()
@@ -1886,6 +2009,17 @@ class Firmetix(threading.Thread):
                 except (RuntimeError, SerialException, OSError):
                     # ignore error on shutdown
                     pass
+            elif self.connection_type == Connection_type.TCP_IP:
+                if not self.sock:
+                    raise Exception('')
+                
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+            elif self.connection_type == Connection_type.BLE:
+                if not self.ble_device:
+                    raise Exception('')
+                
+                self.ble_device.disconnect()
         except Exception:
             raise RuntimeError('Shutdown failed - could not send stop streaming message')
 
@@ -2222,8 +2356,12 @@ class Firmetix(threading.Thread):
     def is_valid_pin(self, pin, analog=False):
         """
         Check if a pin is valid for the current board
+
         :param pin: pin number to check
+        :param analog: True if analog pin, False if digital pin
+
         :return: True if valid, False if not
+
         """
         if analog and pin >= self.__max_number_of_analog_pins:
             return False
@@ -2330,7 +2468,7 @@ class Firmetix(threading.Thread):
         """
 
         self.firmware_version = [data[0], data[1], data[2]]
-    
+
     def _max_pin_message(self, data):
         """
         Max pin message
@@ -2343,11 +2481,10 @@ class Firmetix(threading.Thread):
             if self.shutdown_on_exception:
                 self.shutdown()
             raise ValueError('Got empty max pin message.')
-        
+
         self.__max_number_of_digital_pins = data[0]
         self.__max_number_of_analog_pins = data[1]
         self.__first_analog_pin = self.__max_number_of_digital_pins - self.__max_number_of_analog_pins
-        
 
     def _i2c_read_report(self, data):
         """
@@ -2370,8 +2507,12 @@ class Firmetix(threading.Thread):
         cb_list.append(time.time())
 
         if cb_list[1]:
+            if not self.i2c_callback2:
+                raise AttributeError('i2c callback2 not set')
             self.i2c_callback2(cb_list)
         else:
+            if not self.i2c_callback:
+                raise AttributeError('i2c callback not set')
             self.i2c_callback(cb_list)
 
     def _i2c_too_few(self, data):
@@ -2409,11 +2550,16 @@ class Firmetix(threading.Thread):
 
         cb_list.append(time.time())
 
+        if not self.spi_callback:
+            raise AttributeError('SPI callback not set')
         self.spi_callback(cb_list)
 
     def _onewire_report(self, report):
         cb_list = [PrivateConstants.ONE_WIRE_REPORT, report[0]] + report[1:]
         cb_list.append(time.time())
+
+        if not self.onewire_callback:
+            raise AttributeError('OneWire callback not set')
         self.onewire_callback(cb_list)
 
     def _report_debug_data(self, data):
@@ -2435,7 +2581,7 @@ class Firmetix(threading.Thread):
         if self.loop_back_callback:
             self.loop_back_callback(data)
 
-    def _add_command(self, command, continuous : bool = False):
+    def _add_command(self, command, continuous: bool = False):
         """
         This is a private utility method.
 
@@ -2452,7 +2598,7 @@ class Firmetix(threading.Thread):
 
         # Add command to the queue
         self.__command_queue.append([send_message, continuous])
-    
+
     def _send_command(self):
         """
         This is a private utility method.
@@ -2461,23 +2607,34 @@ class Firmetix(threading.Thread):
         """
         self.run_event.wait()
 
-        while self._is_running() and not self.shutdown_flag: 
+        while self._is_running() and not self.shutdown_flag:
             if len(self.__command_queue) > 0:
                 action = self.__command_queue.pop(0)
                 command = action[0]
-                if self.serial_port:
+                if self.connection_type == Connection_type.SERIAL:
+                    if not self.serial_port:
+                        raise RuntimeError('Serial port not found.')
+                    
                     try:
                         self.serial_port.write(command)
                     except SerialException:
                         if self.shutdown_on_exception:
                             self.shutdown()
                         raise RuntimeError('write fail in _send_command')
-                elif self.ip_address:
+                elif self.connection_type == Connection_type.TCP_IP:
+                    if not self.ip_address or not self.sock:
+                        raise RuntimeError('No ip address or socket found.')
+                    
                     self.sock.sendall(command)
+                elif self.connection_type == Connection_type.BLE:
+                    if not self.ble_device:
+                        raise RuntimeError('No BLE peripheral found.')
+                    
+                    self.ble_device.write_request(PrivateConstants.SERVICE_UUID, PrivateConstants.CHARACTERISTIC_UUID_TX, command)
                 else:
-                    raise RuntimeError('No serial port or ip address set.')
-                
-                if not action[1]: #sleep only if not continuous 
+                    raise RuntimeError('No serial port or ip address or ble device set.')
+
+                if not action[1]:  # sleep only if not continuous
                     time.sleep(self.send_delay)
             else:
                 pass
@@ -2625,6 +2782,9 @@ class Firmetix(threading.Thread):
 
     def _features_report(self, report):
         self.reported_features = report[0]
+    
+    def _not_implemented_report(self, report):
+        print(f'Action not implemented warning. triggerd on pin: {report}')
 
     def _run_threads(self):
         self.run_event.set()
@@ -2669,6 +2829,9 @@ class Firmetix(threading.Thread):
                     # if there is additional data for the report,
                     # it will be contained in response_data
                     # noinspection PyArgumentList
+                    if not dispatch_entry:
+                        raise RuntimeError(
+                            'Invalid report type received: {}'.format(report_type))
                     dispatch_entry(response_data)
                     continue
                 else:
@@ -2689,6 +2852,9 @@ class Firmetix(threading.Thread):
         # Don't start this thread if using a tcp/ip transport
         if self.ip_address:
             return
+
+        if not self.serial_port:
+            raise RuntimeError('No serial port has been set.')
 
         while self._is_running() and not self.shutdown_flag:
             # we can get an OSError: [Errno9] Bad file descriptor when shutting down
@@ -2713,7 +2879,7 @@ class Firmetix(threading.Thread):
 
         # Start this thread only if ip_address is set
 
-        if self.ip_address:
+        if self.ip_address and self.sock:
 
             while self._is_running() and not self.shutdown_flag:
                 try:
@@ -2723,3 +2889,10 @@ class Firmetix(threading.Thread):
                     pass
         else:
             return
+    
+    def _ble_receiver(self, data):
+        """
+        Called when data is received from the BLE device.
+        """
+        for d in data:
+            self.the_deque.append(d)
