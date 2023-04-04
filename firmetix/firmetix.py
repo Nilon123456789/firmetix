@@ -107,8 +107,6 @@ class Firmetix(threading.Thread):
 
         self.ble_mac_address = ble_mac_address
         self.ble_name = ble_name
-        if self.ble_name is None: # if no name is given, use the default
-            self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
 
         self.adapter = None
         self.ble_device = None
@@ -370,6 +368,10 @@ class Firmetix(threading.Thread):
             print(f'Found {len(adapters)} Bluetooth adapters')
             self.adapter = adapters[0] # use the first adapter
             print(f'\tUsing adapter 0: {self.adapter.identifier()}')
+
+            
+            if self.ble_name is None: # if no name is given, use the default
+                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
 
             # if the user did not specify a mac address
             if self.ble_mac_address == None:
