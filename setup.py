@@ -11,8 +11,8 @@ setup(
     packages=['firmetix'],
     install_requires=['pyserial', 'simplepyble'],
 
-    version='7.0.0',
-    description="Remotely Control And Monitor Arduino-Core devices",
+    version='7.0.1',
+    description="Remotely Control And Monitor Arduino and Esp devices",
     long_description=long_description,
     long_description_content_type='text/markdown',
 
