@@ -12,7 +12,7 @@ setup(
     install_requires=['pyserial', 'simplepyble'],
 
     version='7.0.2',
-    description="Remotely Control And Monitor Arduino-Core devices",
+    description="Remotely Control And Monitor Arduino and Esp devices",
     long_description=long_description,
     long_description_content_type='text/markdown',
 
