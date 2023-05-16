@@ -359,7 +359,10 @@ class Firmetix(threading.Thread):
 
             print(f'Successfully connected to: {self.ip_address}:{self.ip_port}')
         elif self.connection_type == Connection_type.BLE:
-
+            
+            if self.ble_name is None: # if no name is given, use the default
+                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
+                
             adapters = simplepyble.Adapter.get_adapters()
 
             if len(adapters) == 0:
@@ -2639,7 +2642,7 @@ class Firmetix(threading.Thread):
                 if not action[1]:  # sleep only if not continuous
                     time.sleep(self.send_delay)
             else:
-                pass
+                time.sleep(self.sleep_tune)
 
     def _servo_unavailable(self, report):
         """
