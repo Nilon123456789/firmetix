@@ -107,8 +107,6 @@ class Firmetix(threading.Thread):
 
         self.ble_mac_address = ble_mac_address
         self.ble_name = ble_name
-        if self.ble_name is None: # if no name is given, use the default
-            self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
 
         self.adapter = None
         self.ble_device = None
@@ -361,7 +359,10 @@ class Firmetix(threading.Thread):
 
             print(f'Successfully connected to: {self.ip_address}:{self.ip_port}')
         elif self.connection_type == Connection_type.BLE:
-
+            
+            if self.ble_name is None: # if no name is given, use the default
+                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
+                
             adapters = simplepyble.Adapter.get_adapters()
 
             if len(adapters) == 0:
