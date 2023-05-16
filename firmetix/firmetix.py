@@ -2638,7 +2638,7 @@ class Firmetix(threading.Thread):
                 if not action[1]:  # sleep only if not continuous
                     time.sleep(self.send_delay)
             else:
-                pass
+                time.sleep(self.sleep_tune)
 
     def _servo_unavailable(self, report):
         """
