@@ -84,7 +84,6 @@ class PrivateConstants:
     GET_FEATURES = 54
     SONAR_DISABLE = 55
     SONAR_ENABLE = 56
-    BOARD_HARD_RESET = 57
     TONE = 70
     NO_TONE = 71
     GET_MAX_PINS = 72

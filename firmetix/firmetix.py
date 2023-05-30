@@ -1986,16 +1986,8 @@ class Firmetix(threading.Thread):
 
         if command:
             self._add_command(command, False)
-        
-    def __hard_reset(self):
-        """
-        This method performs a hard reset of the board. 
-        (Connection is closed when called use with caution)
-        """
-        command = [PrivateConstants.BOARD_HARD_RESET]
-        self._add_command(command, False)
 
-    def shutdown(self, hard_reset=False):
+    def shutdown(self):
         """
         This method attempts an orderly shutdown
         If any exceptions are thrown, they are ignored.
@@ -2016,9 +2008,6 @@ class Firmetix(threading.Thread):
                     self.serial_port.reset_input_buffer()
                     self.serial_port.reset_output_buffer()
 
-                    if (hard_reset):
-                        self.__hard_reset()
-
                     self.serial_port.close()
 
                 except (RuntimeError, SerialException, OSError):
@@ -2027,9 +2016,6 @@ class Firmetix(threading.Thread):
             elif self.connection_type == Connection_type.TCP_IP:
                 if not self.sock:
                     raise Exception('')
-                
-                if (hard_reset):
-                    self.__hard_reset()
 
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
@@ -2037,9 +2023,6 @@ class Firmetix(threading.Thread):
                 if not self.ble_device:
                     raise Exception('')
                 
-                if (hard_reset):
-                    self.__hard_reset()
-
                 self.ble_device.disconnect()
         except Exception:
             raise RuntimeError('Shutdown failed - could not send stop streaming message')
