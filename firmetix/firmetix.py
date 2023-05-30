@@ -44,7 +44,7 @@ class Firmetix(threading.Thread):
 
     # noinspection PyPep8,PyPep8,PyPep8
     def __init__(self, com_port=None, arduino_instance_id=1, connection_type=0,
-                 arduino_wait=4, sleep_tune=0.000001,
+                 arduino_wait=1, sleep_tune=0.000001,
                  shutdown_on_exception=True,
                  ip_address=None, ip_port=31335, baudrate=115200,
                  send_delay=0.01, ble_mac_address=None, ble_name=None):
@@ -423,11 +423,10 @@ class Firmetix(threading.Thread):
             raise RuntimeError(f'Firmetix4Arduino firmware version not found')
 
         else:
-            if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
+            if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION or  self.firmware_version[1] < PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION:
                 raise RuntimeError('Please upgrade the server firmware to version ' + str(
-                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
-            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
-                  f'{self.firmware_version[1]}.{self.firmware_version[2]}')
+                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + '.' +  str(PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION) + 'or greater')
+            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._add_command(command, False)
 
@@ -1987,8 +1986,16 @@ class Firmetix(threading.Thread):
 
         if command:
             self._add_command(command, False)
+        
+    def __hard_reset(self):
+        """
+        This method performs a hard reset of the board. 
+        (Connection is closed when called use with caution)
+        """
+        command = [PrivateConstants.BOARD_HARD_RESET]
+        self._add_command(command, False)
 
-    def shutdown(self):
+    def shutdown(self, hard_reset=False):
         """
         This method attempts an orderly shutdown
         If any exceptions are thrown, they are ignored.
@@ -2009,6 +2016,9 @@ class Firmetix(threading.Thread):
                     self.serial_port.reset_input_buffer()
                     self.serial_port.reset_output_buffer()
 
+                    if (hard_reset):
+                        self.__hard_reset()
+
                     self.serial_port.close()
 
                 except (RuntimeError, SerialException, OSError):
@@ -2018,15 +2028,36 @@ class Firmetix(threading.Thread):
                 if not self.sock:
                     raise Exception('')
                 
+                if (hard_reset):
+                    self.__hard_reset()
+
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
             elif self.connection_type == Connection_type.BLE:
                 if not self.ble_device:
                     raise Exception('')
                 
+                if (hard_reset):
+                    self.__hard_reset()
+
                 self.ble_device.disconnect()
         except Exception:
             raise RuntimeError('Shutdown failed - could not send stop streaming message')
+        
+    def sonar_disable(self):
+        """
+        Disable sonar scanning for all sonar sensors
+        """
+        command = [PrivateConstants.SONAR_DISABLE]
+        self._add_command(command)
+
+    def sonar_enable(self):
+        """
+        Enable sonar scanning for all sonar sensors
+        """
+        command = [PrivateConstants.SONAR_ENABLE]
+        self._add_command(command)
+
 
     def spi_cs_control(self, chip_select_pin, select):
         """
@@ -2393,7 +2424,10 @@ class Firmetix(threading.Thread):
         # self.digital_pins[pin].event_time = time_stamp
         if self.analog_callbacks[pin]:
             message = [PrivateConstants.ANALOG_REPORT, pin, value, time_stamp]
-            self.analog_callbacks[pin](message)
+            try:
+                self.analog_callbacks[pin](message)
+            except KeyError:
+                print(f'Warning: No callback for pin {pin} in analog_callbacks (the error is harmless)')
 
     def _dht_report(self, data):
         """
@@ -2433,7 +2467,10 @@ class Firmetix(threading.Thread):
                 # Callback 0=DHT REPORT, DHT_ERROR, PIN, Time
                 message = [PrivateConstants.DHT_REPORT, data[0], data[1], data[2],
                            time.time()]
-                self.dht_callbacks[data[1]](message)
+                try:
+                    self.dht_callbacks[data[1]](message)
+                except KeyError:
+                 print(f'Warning: Error in dht_callbacks (the error is harmless)')
         else:
             # got valid data DHT_DATA
             f_humidity = float(data[5] + data[6] / 100)
@@ -2444,8 +2481,10 @@ class Firmetix(threading.Thread):
                 f_temperature *= -1.0
             message = [PrivateConstants.DHT_REPORT, data[0], data[1], data[2],
                        f_humidity, f_temperature, time.time()]
-
-            self.dht_callbacks[data[1]](message)
+            try:
+                self.dht_callbacks[data[1]](message)
+            except KeyError:
+                print(f'Warning: Error in dht_callbacks (the error is harmless)')
 
     def _digital_message(self, data):
         """
@@ -2461,7 +2500,10 @@ class Firmetix(threading.Thread):
         time_stamp = time.time()
         if self.digital_callbacks[pin]:
             message = [PrivateConstants.DIGITAL_REPORT, pin, value, time_stamp]
-            self.digital_callbacks[pin](message)
+            try:
+                self.digital_callbacks[pin](message)
+            except KeyError:
+                print(f'Warning: No callback for pin {pin} in digital_callbacks (the error is harmless)')
 
     def _firmware_message(self, data):
         """
