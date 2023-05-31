@@ -44,7 +44,7 @@ class Firmetix(threading.Thread):
 
     # noinspection PyPep8,PyPep8,PyPep8
     def __init__(self, com_port=None, arduino_instance_id=1, connection_type=0,
-                 arduino_wait=4, sleep_tune=0.000001,
+                 arduino_wait=1, sleep_tune=0.000001,
                  shutdown_on_exception=True,
                  ip_address=None, ip_port=31335, baudrate=115200,
                  send_delay=0.01, ble_mac_address=None, ble_name=None):
@@ -354,6 +354,15 @@ class Firmetix(threading.Thread):
                     self.shutdown()
                 raise RuntimeError('No Arduino Found or User Aborted Program')
         elif self.connection_type == Connection_type.TCP_IP:
+            if(self.ip_address is None):
+                print("No IP address specified, starting wifi auto discovery for Firmetix4ESP devices...")
+                try:
+                    self.ip_address = socket.gethostbyname(PrivateConstants.DEFAULT_WIFI_NAME + str(arduino_instance_id) + ".local")
+                except socket.gaierror:
+                    print("No Firmetix4ESP devices found on the network, please specify the IP address manually.")
+                    self.shutdown()
+                else:
+                    print(f'\tFound Firmetix4ESP device at {self.ip_address}')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.ip_address, self.ip_port))
 
@@ -361,7 +370,7 @@ class Firmetix(threading.Thread):
         elif self.connection_type == Connection_type.BLE:
             
             if self.ble_name is None: # if no name is given, use the default
-                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
+                self.ble_name = PrivateConstants.DEFAULT_BLE_NAME + str(arduino_instance_id)
                 
             adapters = simplepyble.Adapter.get_adapters()
 
@@ -371,10 +380,6 @@ class Firmetix(threading.Thread):
             print(f'Found {len(adapters)} Bluetooth adapters')
             self.adapter = adapters[0] # use the first adapter
             print(f'\tUsing adapter 0: {self.adapter.identifier()}')
-
-            
-            if self.ble_name is None: # if no name is given, use the default
-                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
 
             # if the user did not specify a mac address
             if self.ble_mac_address == None:
@@ -411,8 +416,8 @@ class Firmetix(threading.Thread):
 
         # allow the threads to run
         self._run_threads()
-        print(f'Waiting for Arduino to reset')
-        print(f'Reset Complete')
+        print(f'\nWaiting for Arduino to reset')
+        print(f'\tReset Complete')
 
         # get firmetix firmware version and print it
         print('\nRetrieving Firmetix4Arduino firmware ID...')
@@ -423,11 +428,10 @@ class Firmetix(threading.Thread):
             raise RuntimeError(f'Firmetix4Arduino firmware version not found')
 
         else:
-            if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION:
+            if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION or  self.firmware_version[1] < PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION:
                 raise RuntimeError('Please upgrade the server firmware to version ' + str(
-                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + ' or greater')
-            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'
-                  f'{self.firmware_version[1]}.{self.firmware_version[2]}')
+                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + '.' +  str(PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION) + ' or greater (current is version: ' + str(self.firmware_version[0]) + '.' + str(self.firmware_version[1]) + ')''')
+            print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._add_command(command, False)
 
@@ -2017,7 +2021,7 @@ class Firmetix(threading.Thread):
             elif self.connection_type == Connection_type.TCP_IP:
                 if not self.sock:
                     raise Exception('')
-                
+
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
             elif self.connection_type == Connection_type.BLE:
@@ -2027,6 +2031,21 @@ class Firmetix(threading.Thread):
                 self.ble_device.disconnect()
         except Exception:
             raise RuntimeError('Shutdown failed - could not send stop streaming message')
+        
+    def sonar_disable(self):
+        """
+        Disable sonar scanning for all sonar sensors
+        """
+        command = [PrivateConstants.SONAR_DISABLE]
+        self._add_command(command)
+
+    def sonar_enable(self):
+        """
+        Enable sonar scanning for all sonar sensors
+        """
+        command = [PrivateConstants.SONAR_ENABLE]
+        self._add_command(command)
+
 
     def spi_cs_control(self, chip_select_pin, select):
         """
@@ -2393,7 +2412,10 @@ class Firmetix(threading.Thread):
         # self.digital_pins[pin].event_time = time_stamp
         if self.analog_callbacks[pin]:
             message = [PrivateConstants.ANALOG_REPORT, pin, value, time_stamp]
-            self.analog_callbacks[pin](message)
+            try:
+                self.analog_callbacks[pin](message)
+            except KeyError:
+                print(f'Warning: No callback for pin {pin} in analog_callbacks (the error is harmless)')
 
     def _dht_report(self, data):
         """
@@ -2433,7 +2455,10 @@ class Firmetix(threading.Thread):
                 # Callback 0=DHT REPORT, DHT_ERROR, PIN, Time
                 message = [PrivateConstants.DHT_REPORT, data[0], data[1], data[2],
                            time.time()]
-                self.dht_callbacks[data[1]](message)
+                try:
+                    self.dht_callbacks[data[1]](message)
+                except KeyError:
+                 print(f'Warning: Error in dht_callbacks (the error is harmless)')
         else:
             # got valid data DHT_DATA
             f_humidity = float(data[5] + data[6] / 100)
@@ -2444,8 +2469,10 @@ class Firmetix(threading.Thread):
                 f_temperature *= -1.0
             message = [PrivateConstants.DHT_REPORT, data[0], data[1], data[2],
                        f_humidity, f_temperature, time.time()]
-
-            self.dht_callbacks[data[1]](message)
+            try:
+                self.dht_callbacks[data[1]](message)
+            except KeyError:
+                print(f'Warning: Error in dht_callbacks (the error is harmless)')
 
     def _digital_message(self, data):
         """
@@ -2461,7 +2488,10 @@ class Firmetix(threading.Thread):
         time_stamp = time.time()
         if self.digital_callbacks[pin]:
             message = [PrivateConstants.DIGITAL_REPORT, pin, value, time_stamp]
-            self.digital_callbacks[pin](message)
+            try:
+                self.digital_callbacks[pin](message)
+            except KeyError:
+                print(f'Warning: No callback for pin {pin} in digital_callbacks (the error is harmless)')
 
     def _firmware_message(self, data):
         """

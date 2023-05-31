@@ -82,9 +82,11 @@ class PrivateConstants:
     STEPPER_GET_DISTANCE_TO_GO = 52
     STEPPER_GET_TARGET_POSITION = 53
     GET_FEATURES = 54
-    TONE = 55
-    NO_TONE = 56
-    GET_MAX_PINS = 57
+    SONAR_DISABLE = 55
+    SONAR_ENABLE = 56
+    TONE = 70
+    NO_TONE = 71
+    GET_MAX_PINS = 72
 
     # reports
     # debug data from Arduino
@@ -110,8 +112,9 @@ class PrivateConstants:
     DEBUG_PRINT = 99
     MAX_PIN_REPORT = GET_MAX_PINS
 
-    FIRMETIX_VERSION = "7.0.2"
+    FIRMETIX_VERSION = "7.1.2"
     FIRMETIX4ARDUINO_MAJOR_VERSION = 7
+    FIRMETIX4ARDUINO_MINOR_VERSION = 1
 
     # reporting control
     REPORTING_DISABLE_ALL = 0
@@ -148,6 +151,10 @@ class PrivateConstants:
     SPI_FEATURE = 0x08
     SERVO_FEATURE = 0x10
     SONAR_FEATURE = 0x20
+
+    # default names
+    DEFAULT_WIFI_NAME = "Firmetix4ESP-WIFI-"
+    DEFAULT_BLE_NAME =  "Firmetix4ESP_BLE_"
 
     # BLE UID
     SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e" # UART service UUID
