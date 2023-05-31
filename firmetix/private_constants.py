@@ -152,6 +152,10 @@ class PrivateConstants:
     SERVO_FEATURE = 0x10
     SONAR_FEATURE = 0x20
 
+    # default names
+    DEFAULT_WIFI_NAME = "Firmetix4ESP-WIFI-"
+    DEFAULT_BLE_NAME =  "Firmetix4ESP_BLE_"
+
     # BLE UID
     SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e" # UART service UUID
     CHARACTERISTIC_UUID_TX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e" # RX characteristic UUID

@@ -354,6 +354,15 @@ class Firmetix(threading.Thread):
                     self.shutdown()
                 raise RuntimeError('No Arduino Found or User Aborted Program')
         elif self.connection_type == Connection_type.TCP_IP:
+            if(self.ip_address is None):
+                print("No IP address specified, starting wifi auto discovery for Firmetix4ESP devices...")
+                try:
+                    self.ip_address = socket.gethostbyname(PrivateConstants.DEFAULT_WIFI_NAME + str(arduino_instance_id) + ".local")
+                except socket.gaierror:
+                    print("No Firmetix4ESP devices found on the network, please specify the IP address manually.")
+                    self.shutdown()
+                else:
+                    print(f'\tFound Firmetix4ESP device at {self.ip_address}')
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.ip_address, self.ip_port))
 
@@ -361,7 +370,7 @@ class Firmetix(threading.Thread):
         elif self.connection_type == Connection_type.BLE:
             
             if self.ble_name is None: # if no name is given, use the default
-                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
+                self.ble_name = PrivateConstants.DEFAULT_BLE_NAME + str(arduino_instance_id)
                 
             adapters = simplepyble.Adapter.get_adapters()
 
@@ -371,10 +380,6 @@ class Firmetix(threading.Thread):
             print(f'Found {len(adapters)} Bluetooth adapters')
             self.adapter = adapters[0] # use the first adapter
             print(f'\tUsing adapter 0: {self.adapter.identifier()}')
-
-            
-            if self.ble_name is None: # if no name is given, use the default
-                self.ble_name = "Firmetix4ESP_BLE_" + str(arduino_instance_id)
 
             # if the user did not specify a mac address
             if self.ble_mac_address == None:
@@ -411,8 +416,8 @@ class Firmetix(threading.Thread):
 
         # allow the threads to run
         self._run_threads()
-        print(f'Waiting for Arduino to reset')
-        print(f'Reset Complete')
+        print(f'\nWaiting for Arduino to reset')
+        print(f'\tReset Complete')
 
         # get firmetix firmware version and print it
         print('\nRetrieving Firmetix4Arduino firmware ID...')
@@ -425,7 +430,7 @@ class Firmetix(threading.Thread):
         else:
             if self.firmware_version[0] < PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION or  self.firmware_version[1] < PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION:
                 raise RuntimeError('Please upgrade the server firmware to version ' + str(
-                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + '.' +  str(PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION) + 'or greater')
+                    PrivateConstants.FIRMETIX4ARDUINO_MAJOR_VERSION) + '.' +  str(PrivateConstants.FIRMETIX4ARDUINO_MINOR_VERSION) + ' or greater (current is version: ' + str(self.firmware_version[0]) + '.' + str(self.firmware_version[1]) + ')''')
             print(f'FirmetixArduino firmware version: {self.firmware_version[0]}.'f'{self.firmware_version[1]}.{self.firmware_version[2]}')
         command = [PrivateConstants.ENABLE_ALL_REPORTS]
         self._add_command(command, False)
