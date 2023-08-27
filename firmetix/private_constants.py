@@ -84,9 +84,9 @@ class PrivateConstants:
     GET_FEATURES = 54
     SONAR_DISABLE = 55
     SONAR_ENABLE = 56
-    TONE = 70
-    NO_TONE = 71
-    GET_MAX_PINS = 72
+    TONE = 57
+    NO_TONE = 58
+    GET_MAX_PINS = 59
 
     # reports
     # debug data from Arduino
@@ -109,8 +109,8 @@ class PrivateConstants:
     STEPPER_RUN_COMPLETE_REPORT = 19
     FEATURES = 20
     NOT_IMPLEMENTED = 21
+    MAX_PIN_REPORT = 22
     DEBUG_PRINT = 99
-    MAX_PIN_REPORT = GET_MAX_PINS
 
     FIRMETIX_VERSION = "7.1.0"
     FIRMETIX4ARDUINO_MAJOR_VERSION = 7
