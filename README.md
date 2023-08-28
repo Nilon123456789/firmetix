@@ -37,7 +37,7 @@ The project consists of a [Python client API](https://htmlpreview.github.io/?htt
 
 This repository is the Python 3 client API.
 
-The server for Arduino serial linked devices is called
-[Firmetix4Arduino](https://github.com/Nilon123456789/Firmetix4Arduino).
+The server for Arduino serial linked devices is called or esp devices
+[Firmetix](https://github.com/Nilon123456789/Firmetix-Library).
 
 A [User's Guide](https://nilon123456789.github.io/firmetix/) explaining installation and use is available online.
