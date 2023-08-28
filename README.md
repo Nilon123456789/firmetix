@@ -1,4 +1,6 @@
 # The Firmetix Project
+[![PyPI version](https://img.shields.io/pypi/v/firmetix.svg?logo=pypi&logoColor=FFE873)](https://pypi.org/project/firmetix/)
+[![arduino-library-badge](https://www.ardu-badge.com/badge/Firmetix.svg?)](https://www.ardu-badge.com/Firmetix)
 
 Firmetix is a fork of the [Telemetrix](https://github.com/MrYsLab/telemetrix) project with the added suport for the tone function and other features
 
