@@ -44,7 +44,7 @@ class Firmetix(threading.Thread):
 
     # noinspection PyPep8,PyPep8,PyPep8
     def __init__(self, com_port=None, arduino_instance_id=1, connection_type=0,
-                 arduino_wait=1, sleep_tune=0.000001,
+                 arduino_wait=5, sleep_tune=0.000001,
                  shutdown_on_exception=True,
                  ip_address=None, ip_port=31335, baudrate=115200,
                  send_delay=0.01, ble_mac_address=None, ble_name=None):
